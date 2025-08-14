@@ -8,6 +8,9 @@ SCL_PIN=19
 
 I2C_ADDR=9
 
+pkt_rec_count = 0
+pkt_success_count = 0
+
 ''' ------------------------------------------------------------------------
 i2c_loop
 
@@ -82,8 +85,6 @@ def i2c_loop(id, tick):
    ------------------------------------------------------------------------ '''
 # Start the interface
 pi = pigpio.pi()
-pkt_rec_count = 0
-pkt_success_count = 0
 
 if not pi.connected:
    exit()
