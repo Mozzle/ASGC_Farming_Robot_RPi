@@ -29,6 +29,8 @@ class Data_Interface:
       pi.set_pull_up_down(SDA_PIN, pigpio.PUD_UP)
       pi.set_pull_up_down(SCL_PIN, pigpio.PUD_UP)
 
+      print("Starting I2C Data Interface...")
+
       # Respond to BSC slave activity, registering the i2c_loop as callback function
       e = pi.event_callback(pigpio.EVENT_BSC, self.i2c_loop)
 

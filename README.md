@@ -1,3 +1,5 @@
+## This is the Raspberry Pi Submodule for the ASGC Farming Robot. This repository contains the code necessary to run on the Raspberry Pi. The Raspberry Pi in our automated farming system acts as a web server and a communications hub between the STM32 NUCLEO-H755ZI board (sensors, data processing, command logic) and the SKR-MINI-E3 CNC Control Board.
+
 # Raspberry Pi Setup:
 
 ### **OS: OctoKlipperPi**
@@ -22,8 +24,10 @@ The Raspberry Pi data interface requires Python >=3.10
 python3 --version
 ```
 
-### **3) Clone the Project Repo**
-
+### **3) Clone the Project's Raspberry Pi Submodule**
+```
+git clone https://github.com/Mozzle/ASGC_Farming_Robot_RPi.git
+```
 
 ### **4) Add pigpio daemon to the root crontab**
 This change will start the pigpio daemon on startup every time the Raspberry Pi is turned on.
@@ -50,7 +54,7 @@ nano ~/.bashrc
 ```
 Add the following line to the bottom:
 ```
-python3 /full/path/to/Data_Intf.py
+python3 /full/path/to/ASGC_Farming_Robot_RPi/Data_Intf.py
 ```
 
-### **6) Reboot and confirm the Data Interface is running properly**
+### **6) Reboot and confirm the Data Interface is running properly on startup**
