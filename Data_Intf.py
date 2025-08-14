@@ -60,51 +60,49 @@ class Data_Interface:
             pass
 
          # Match the pkt_id
-         match data[I2C_Packets.PACKET_ID]:
+         # -------------------------- ERROR PKT ID ----------------------------
+         if data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_ERR_PKT_ID:
+            print("Yeah!")
 
-            # ------------------------ ERROR PKT ID ---------------------------
-            case I2C_Packets.RPI_ERR_PKT_ID:
-               print("Yeah!")
+         # -------------------------- GCODE PKT ID ----------------------------
+         elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_GCODE_PKT_ID:
+            # Parse the data into the packet struct
+            pkt = I2C_Packets.RPI_I2C_Packet_GCode(data)
 
-            # ------------------------ GCODE PKT ID ---------------------------
-            case I2C_Packets.RPI_GCODE_PKT_ID:
-               # Parse the data into the packet struct
-               pkt = I2C_Packets.RPI_I2C_Packet_GCode(data)
+            # If packet is valid
+            if pkt.valid is True:
+               # Send the gcode to the SKR MINI E3 via the terminal
+               terminal_cmd = "echo " + pkt.gcode_str + " >> /tmp/printer"
+               call(terminal_cmd)
 
-               # If packet is valid
-               if pkt.valid is True:
-                  # Send the gcode to the SKR MINI E3 via the terminal
-                  terminal_cmd = "echo " + pkt.gcode_str + " >> /tmp/printer"
-                  call(terminal_cmd)
+               if pkt.gcode_str == "G28":
+                  pkt_success_count += 1
 
-                  if pkt.gcode_str == "G28":
-                     pkt_success_count += 1
+               print("GCode [" + pkt_success_count + "/" + pkt_rec_count + "]: " + pkt.gcode_str)
 
-                  print("GCode [" + pkt_success_count + "/" + pkt_rec_count + "]: " + pkt.gcode_str)
+         # ------------------------ AHT20 DATA PKT ID -------------------------
+         elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_AHT20_PKT_ID:
+            print("Else!")
 
-            # ---------------------- AHT20 DATA PKT ID ------------------------
-            case I2C_Packets.RPI_AHT20_PKT_ID:
-               print("Else!")
+         # ------------------------ WATER DATA PKT ID -------------------------
+         elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_WATER_DATA_PKT_ID:
+            pass
+         
+         # ----------------------- BUTTONS DATA PKT ID ------------------------
+         elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_BUTTONS_PKT_ID:
+            pass
+         
+         # ---------------------- NET POT STATUS PKT ID -----------------------
+         elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_NET_POT_STATUS_PKT_ID:
+            pass
+         
+         # ------------------ GET AXES DATA REQUEST PKT ID --------------------
+         elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_GET_AXES_POS_PKT_ID:
+            pass
 
-            # ---------------------- WATER DATA PKT ID ------------------------
-            case I2C_Packets.RPI_WATER_DATA_PKT_ID:
-               pass
-            
-            # --------------------- BUTTONS DATA PKT ID -----------------------
-            case I2C_Packets.RPI_BUTTONS_PKT_ID:
-               pass
-            
-            # -------------------- NET POT STATUS PKT ID ----------------------
-            case I2C_Packets.RPI_NET_POT_STATUS_PKT_ID:
-               pass
-            
-            # ---------------- GET AXES DATA REQUEST PKT ID -------------------
-            case I2C_Packets.RPI_GET_AXES_POS_PKT_ID:
-               pass
-
-            # ----------------------- DEFAULT CASE ----------------------------
-            case _:
-               print("okay")
+         # -------------------------- DEFAULT CASE ----------------------------
+         else:
+            print("okay")
 
          
 

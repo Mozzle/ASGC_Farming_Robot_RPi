@@ -19,7 +19,7 @@ sudo apt-get install python3-pigpio
 ```
 
 ### **2.1) Check Python Version**
-The Raspberry Pi data interface requires Python >=3.10
+The Raspberry Pi data interface requires Python >=3.7
 ```
 python3 --version
 ```
