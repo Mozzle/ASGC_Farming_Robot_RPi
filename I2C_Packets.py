@@ -14,6 +14,9 @@ RPI_I2C_PACKET_SIZE 		= 128
 PACKET_ID                   = 0
 PACKET_VALID                = 1
 
+RPI_ERR_PKT_LAST_VALID_BYTE     = 0
+RPI_GCODE_PKT_LAST_VALID_BYTE   = 66
+
 ''' ------------------------------------------------------------------------
 RPI_GCODE_PKT_ID - GCode Packet
 Packet Elements:
@@ -35,4 +38,5 @@ class RPI_I2C_Packet_GCode:
             self.valid = data[PACKET_VALID]
 
         self.gcode_str = data[2:66].decode('UTF-8').strip()
+        self.gcode_str = self.gcode_str.replace('\x00', '')
 

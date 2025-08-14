@@ -8,6 +8,9 @@ SCL_PIN=19
 
 I2C_ADDR=9
 
+C_FALSE=0
+C_TRUE=1
+
 pkt_rec_count = 0
 pkt_success_count = 0
 
@@ -21,7 +24,7 @@ i2c_loop
 def i2c_loop(id, tick):
    global pkt_rec_count
    global pkt_success_count
-   
+
    status, bytes_rec, data = pi.bsc_i2c(I2C_ADDR) #status, num bytes, data
 
    # If we received data
@@ -29,11 +32,11 @@ def i2c_loop(id, tick):
       #print(data[:-1])
       pkt_rec_count += 1
 
-      if len(data) is not I2C_Packets.RPI_I2C_PACKET_SIZE:
+      if bytes_rec is not I2C_Packets.RPI_I2C_PACKET_SIZE:
          # Error of some kind
          # Maybe send back a 'data not received' pkt
-         print("ERROR: Packet length mismatch!")
-         pass
+         print("ERROR: Packet length mismatch! Len:" + str(bytes_rec))
+         print(data)
 
       # Match the pkt_id
       # -------------------------- ERROR PKT ID ----------------------------
@@ -41,20 +44,20 @@ def i2c_loop(id, tick):
          print("Yeah!")
 
       # -------------------------- GCODE PKT ID ----------------------------
-      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_GCODE_PKT_ID:
+      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_GCODE_PKT_ID and bytes_rec >= I2C_Packets.RPI_GCODE_PKT_LAST_VALID_BYTE:
          # Parse the data into the packet struct
          pkt = I2C_Packets.RPI_I2C_Packet_GCode(data)
 
          # If packet is valid
-         if pkt.valid is True:
+         if pkt.valid == C_TRUE:
             # Send the gcode to the SKR MINI E3 via the terminal
-            terminal_cmd = "echo " + pkt.gcode_str + " >> /tmp/printer"
-            call(terminal_cmd)
+            call(["echo", pkt.gcode_str, ">>", "/tmp/printer/"])
 
             if pkt.gcode_str == "G28":
                pkt_success_count += 1
 
-            print("GCode [" + pkt_success_count + "/" + pkt_rec_count + "]: " + pkt.gcode_str)
+            print("GCode [" + str(pkt_success_count) + "/" + str(pkt_rec_count) + "]: " + pkt.gcode_str)
+
 
       # ------------------------ AHT20 DATA PKT ID -------------------------
       elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_AHT20_PKT_ID:
@@ -63,15 +66,15 @@ def i2c_loop(id, tick):
       # ------------------------ WATER DATA PKT ID -------------------------
       elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_WATER_DATA_PKT_ID:
          pass
-      
+
       # ----------------------- BUTTONS DATA PKT ID ------------------------
       elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_BUTTONS_PKT_ID:
          pass
-      
+
       # ---------------------- NET POT STATUS PKT ID -----------------------
       elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_NET_POT_STATUS_PKT_ID:
          pass
-      
+
       # ------------------ GET AXES DATA REQUEST PKT ID --------------------
       elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_GET_AXES_POS_PKT_ID:
          pass
@@ -80,7 +83,7 @@ def i2c_loop(id, tick):
       else:
          print("okay")
 
-         
+
 
 ''' ------------------------------------------------------------------------
    Program Entry Point
@@ -100,7 +103,7 @@ print("Starting I2C Data Interface...")
 # Respond to BSC slave activity, registering the i2c_loop as callback function
 e = pi.event_callback(pigpio.EVENT_BSC, i2c_loop)
 pi.bsc_i2c(I2C_ADDR) # Configure BSC as I2C slave
-time.sleep(600)
+time.sleep(800)
 
 # If the interface exits, gracefully shut down
 e.cancel()
