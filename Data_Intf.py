@@ -19,7 +19,9 @@ i2c_loop
    responding to I2C packets from the Nucleo Board.
 ------------------------------------------------------------------------ '''
 def i2c_loop(id, tick):
-
+   global pkt_rec_count
+   global pkt_success_count
+   
    status, bytes_rec, data = pi.bsc_i2c(I2C_ADDR) #status, num bytes, data
 
    # If we received data
