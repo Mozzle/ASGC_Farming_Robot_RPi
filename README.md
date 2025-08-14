@@ -19,7 +19,7 @@ sudo apt-get install python3-pigpio
 ```
 
 ### **2.1) Check Python Version**
-The Raspberry Pi data interface requires Python >=3.7
+The Raspberry Pi data interface requires Python >=3.10
 ```
 python3 --version
 ```
@@ -37,7 +37,7 @@ sudo crontab -e
 ```
 Navigate to the bottom of the file and add the following line:
 ```
-@reboot              /usr/local/bin/pigpiod
+@reboot              /usr/bin/pigpiod
 ```
 
 ### **5) Make the Data Interface Python script run on startup**
