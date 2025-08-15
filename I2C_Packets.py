@@ -11,7 +11,7 @@ RPI_GET_AXES_POS_PKT_ID     = 6
 
 RPI_PACKET_MAX_LENGTHS     = [
     128,  # RPI_ERR_PKT_ID
-    66,   # RPI_GCODE_PKT_ID
+    62,   # RPI_GCODE_PKT_ID
     16,   # RPI_AHT20_PKT_ID
     128,  # RPI_WATER_DATA_PKT_ID
     128,  # RPI_BUTTONS_PKT_ID
@@ -47,6 +47,6 @@ class RPI_I2C_Packet_GCode:
             # Get packet validity from data
             self.valid = data[PACKET_VALID]
 
-        self.gcode_str = data[2:66].decode('UTF-8').strip()
+        self.gcode_str = data[2:62].decode('UTF-8').strip()
         self.gcode_str = self.gcode_str.replace('\x00', '')
 

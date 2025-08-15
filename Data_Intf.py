@@ -46,7 +46,7 @@ def i2c_loop(id, tick):
          print("Yeah!")
 
       # -------------------------- GCODE PKT ID ----------------------------
-      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_GCODE_PKT_ID and bytes_rec >= I2C_Packets.RPI_GCODE_PKT_LAST_VALID_BYTE:
+      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_GCODE_PKT_ID and bytes_rec == I2C_Packets.RPI_PACKET_MAX_LENGTHS[I2C_Packets.RPI_GCODE_PKT_ID]:
          # Parse the data into the packet struct
          pkt = I2C_Packets.RPI_I2C_Packet_GCode(data)
 
