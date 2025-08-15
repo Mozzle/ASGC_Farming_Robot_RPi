@@ -55,7 +55,7 @@ def i2c_loop(id, tick):
             # Send the gcode to the SKR MINI E3 via the terminal
             call(["echo", pkt.gcode_str, ">>", "/tmp/printer/"])
 
-            if pkt.gcode_str == "G28":
+            if pkt.gcode_str == "G28 0123456789012345678901234567890123":
                pkt_success_count += 1
 
             print("GCode [" + str(pkt_success_count) + "/" + str(pkt_rec_count) + "]: " + pkt.gcode_str)
