@@ -32,11 +32,13 @@ def i2c_loop(id, tick):
       #print(data[:-1])
       pkt_rec_count += 1
 
-      if bytes_rec is not I2C_Packets.RPI_I2C_PACKET_SIZE:
+      # If the received data length does not match the expected packet size
+      if bytes_rec is not I2C_Packets.RPI_PACKET_MAX_LENGTHS[data[I2C_Packets.PACKET_ID]]:
          # Error of some kind
-         # Maybe send back a 'data not received' pkt
          print("ERROR: Packet length mismatch! Len:" + str(bytes_rec))
          print(data)
+         # Send back a 'data not received' pkt
+
 
       # Match the pkt_id
       # -------------------------- ERROR PKT ID ----------------------------
