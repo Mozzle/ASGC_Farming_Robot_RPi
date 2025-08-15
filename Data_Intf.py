@@ -13,10 +13,6 @@ C_TRUE=1
 
 pkt_rec_count = 0
 pkt_success_count = 0
-currently_receiving_packet = False
-packet_being_received = 0
-pkt = None
-pkt_chunk_index = 0
 
 ''' ------------------------------------------------------------------------
 i2c_loop
@@ -28,102 +24,66 @@ i2c_loop
 def i2c_loop(id, tick):
    global pkt_rec_count
    global pkt_success_count
-   global currently_receiving_packet
-   global packet_being_received
-   global pkt
 
    status, bytes_rec, data = pi.bsc_i2c(I2C_ADDR) #status, num bytes, data
 
-   # If we are in the process of receiving the chunks of a packet
-   if currently_receiving_packet:
-      if bytes_rec:
-         if bytes_rec is not I2C_Packets.NUM_CHUNKS_PER_PACKET:
-            # Error of some kind
-            # Maybe send back a 'data not received' pkt
-            print("ERROR: Packet length mismatch! Len:" + str(bytes_rec))
-            print(data)
-            # Need to reset and ignore the rest of the chunks
+   # If we received data
+   if bytes_rec:
+      #print(data[:-1])
+      pkt_rec_count += 1
 
-         # append the chunk to the packet we're receiving
-         pkt.append(data)
-         pkt_chunk_index += 1
+      if bytes_rec is not I2C_Packets.RPI_I2C_PACKET_SIZE:
+         # Error of some kind
+         # Maybe send back a 'data not received' pkt
+         print("ERROR: Packet length mismatch! Len:" + str(bytes_rec))
+         print(data)
 
-         # If we have received all the chunks of the packet
-         if pkt_chunk_index >= I2C_Packets.NUM_CHUNKS_PER_PACKET:
-            # Process the completed packet
-            parse_completed_packet(pkt)
+      # Match the pkt_id
+      # -------------------------- ERROR PKT ID ----------------------------
+      if data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_ERR_PKT_ID:
+         print("Yeah!")
 
-            currently_receiving_packet = False
-            pkt_chunk_index = 0
-            pkt.clear()
+      # -------------------------- GCODE PKT ID ----------------------------
+      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_GCODE_PKT_ID and bytes_rec >= I2C_Packets.RPI_GCODE_PKT_LAST_VALID_BYTE:
+         # Parse the data into the packet struct
+         pkt = I2C_Packets.RPI_I2C_Packet_GCode(data)
 
+         # If packet is valid
+         if pkt.valid == C_TRUE:
+            # Send the gcode to the SKR MINI E3 via the terminal
+            call(["echo", pkt.gcode_str, ">>", "/tmp/printer/"])
 
-         
-         
+            if pkt.gcode_str == "G28":
+               pkt_success_count += 1
 
-   # If we are now receiving a new packet
-   else:
-      # If we received data
-      if bytes_rec:
-         #print(data[:-1])
-         pkt_rec_count += 1
-         pkt.append(data)
-         currently_receiving_packet = True
-         pkt_chunk_index += 1
+            print("GCode [" + str(pkt_success_count) + "/" + str(pkt_rec_count) + "]: " + pkt.gcode_str)
 
 
-def parse_completed_packet(pkt):
-   if len(pkt) is not I2C_Packets.RPI_I2C_PACKET_SIZE:
-      # Error of some kind
-      # Maybe send back a 'data not received' pkt
-      print("ERROR: Total Packet length mismatch! Len:" + str(len(pkt)))
-      print(pkt)
-      return
-   
-   # Match the pkt_id
-   # -------------------------- ERROR PKT ID ----------------------------
-   if pkt[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_ERR_PKT_ID:
-      print("Error Packet ID received!")
+      # ------------------------ AHT20 DATA PKT ID -------------------------
+      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_AHT20_PKT_ID:
+         print("Else!")
 
-   # -------------------------- GCODE PKT ID ----------------------------
-   elif pkt[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_GCODE_PKT_ID and bytes_rec >= I2C_Packets.RPI_GCODE_PKT_LAST_VALID_BYTE:
-      # Parse the data into the packet struct
-      pkt = I2C_Packets.RPI_I2C_Packet_GCode(pkt)
+      # ------------------------ WATER DATA PKT ID -------------------------
+      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_WATER_DATA_PKT_ID:
+         pass
 
-      # If packet is valid
-      if pkt.valid == C_TRUE:
-         # Send the gcode to the SKR MINI E3 via the terminal
-         call(["echo", pkt.gcode_str, ">>", "/tmp/printer/"])
+      # ----------------------- BUTTONS DATA PKT ID ------------------------
+      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_BUTTONS_PKT_ID:
+         pass
 
-         if pkt.gcode_str == "G28":
-            pkt_success_count += 1
+      # ---------------------- NET POT STATUS PKT ID -----------------------
+      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_NET_POT_STATUS_PKT_ID:
+         pass
 
-         print("GCode [" + str(pkt_success_count) + "/" + str(pkt_rec_count) + "]: " + pkt.gcode_str)
+      # ------------------ GET AXES DATA REQUEST PKT ID --------------------
+      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_GET_AXES_POS_PKT_ID:
+         pass
+
+      # -------------------------- DEFAULT CASE ----------------------------
+      else:
+         print("okay")
 
 
-   # ------------------------ AHT20 DATA PKT ID -------------------------
-   elif pkt[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_AHT20_PKT_ID:
-      print("Else!")
-
-   # ------------------------ WATER DATA PKT ID -------------------------
-   elif pkt[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_WATER_DATA_PKT_ID:
-      pass
-
-   # ----------------------- BUTTONS DATA PKT ID ------------------------
-   elif pkt[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_BUTTONS_PKT_ID:
-      pass
-
-   # ---------------------- NET POT STATUS PKT ID -----------------------
-   elif pkt[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_NET_POT_STATUS_PKT_ID:
-      pass
-
-   # ------------------ GET AXES DATA REQUEST PKT ID --------------------
-   elif pkt[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_GET_AXES_POS_PKT_ID:
-      pass
-
-   # -------------------------- DEFAULT CASE ----------------------------
-   else:
-      print("ERROR: Unknown packet ID received!")
 
 ''' ------------------------------------------------------------------------
    Program Entry Point
