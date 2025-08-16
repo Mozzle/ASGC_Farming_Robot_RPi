@@ -61,6 +61,7 @@ class RPI_I2C_Packet_ACK:
         self.packet_id = RPI_ACK_PKT_ID
         self.ack = ack
         # Get the raw byte representation of the packet
-        self.raw = ((self.packet_id << 4) | self.ack)
+        self.raw = ((self.packet_id << 8) | self.ack)
+        self.raw = self.raw.to_bytes(2, byteorder='big')
 
 

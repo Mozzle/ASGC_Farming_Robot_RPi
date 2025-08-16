@@ -34,7 +34,8 @@ def i2c_loop(id, tick):
 
       if data[I2C_Packets.PACKET_ID] >= I2C_Packets.RPI_I2C_NUM_PKT_IDS:
          ack_pkt = I2C_Packets.RPI_I2C_Packet_ACK(C_FALSE)
-         print("NACK PACKET: " + bin(ack_pkt.raw))
+         print("NACK PACKET: ")
+         print(ack_pkt.raw)
          s, b, d = pi.bsc_i2c(I2C_ADDR, ack_pkt.raw)
          return
 
@@ -44,7 +45,8 @@ def i2c_loop(id, tick):
          # Error of some kind
          print("ERROR: Packet length mismatch! Len:" + str(bytes_rec))
          ack_pkt = I2C_Packets.RPI_I2C_Packet_ACK(C_FALSE)
-         print("NACK PACKET: " + bin(ack_pkt.raw))
+         print("NACK PACKET: ")
+         print(ack_pkt.raw)
          s, b, d = pi.bsc_i2c(I2C_ADDR, ack_pkt.raw)
          return
 
@@ -64,14 +66,15 @@ def i2c_loop(id, tick):
             # Send the gcode to the SKR MINI E3 via the terminal
             call(["echo", pkt.gcode_str, ">>", "/tmp/printer/"])
 
-            if pkt.gcode_str == "G28 0123456789":
+            if pkt.gcode_str == "G28 012345678":
                pkt_success_count += 1
 
             ack_pkt = I2C_Packets.RPI_I2C_Packet_ACK(C_TRUE)
-            print("ACK PACKET: " + bin(ack_pkt.raw))
+            #print("ACK PACKET: ")
+            #print(ack_pkt.raw)
             s, b, d = pi.bsc_i2c(I2C_ADDR, ack_pkt.raw)
 
-            print("GCode [" + str(pkt_success_count) + "/" + str(pkt_rec_count) + "]: " + pkt.gcode_str)
+            print("[" + str(pkt_success_count) + "/" + str(pkt_rec_count) + "]")
 
 
       # ------------------------ AHT20 DATA PKT ID -------------------------
