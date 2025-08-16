@@ -47,7 +47,7 @@ def i2c_loop(id, tick):
          print("Yeah!")
 
       # -------------------------- GCODE PKT ID ----------------------------
-      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_GCODE_PKT_ID and bytes_rec >= (I2C_Packets.RPI_PACKET_MAX_LENGTHS[I2C_Packets.RPI_GCODE_PKT_ID] - I2C_Packets.RPI_PACKET_PAD_LENGTH):
+      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_GCODE_PKT_ID and bytes_rec == I2C_Packets.RPI_PACKET_MAX_LENGTHS[I2C_Packets.RPI_GCODE_PKT_ID]:
          # Parse the data into the packet struct
          pkt = I2C_Packets.RPI_I2C_Packet_GCode(data)
 
@@ -56,7 +56,7 @@ def i2c_loop(id, tick):
             # Send the gcode to the SKR MINI E3 via the terminal
             call(["echo", pkt.gcode_str, ">>", "/tmp/printer/"])
 
-            if pkt.gcode_str == "G28 0123456789012345678901234567890123":
+            if pkt.gcode_str == "G28 0123456789":
                pkt_success_count += 1
 
             print("GCode [" + str(pkt_success_count) + "/" + str(pkt_rec_count) + "]: " + pkt.gcode_str)
