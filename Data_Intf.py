@@ -37,6 +37,7 @@ def i2c_loop(id, tick):
          # Error of some kind
          print("ERROR: Packet length mismatch! Len:" + str(bytes_rec))
          print(data)
+         print(bin(status))
          # Send back a 'data not received' pkt
 
 
