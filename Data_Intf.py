@@ -13,6 +13,8 @@ C_TRUE=1
 
 pkt_rec_count = 0
 pkt_success_count = 0
+last_rec_pkt_id = -1
+gcode_full_str = ""
 
 ''' ------------------------------------------------------------------------
 i2c_loop
@@ -24,6 +26,8 @@ i2c_loop
 def i2c_loop(id, tick):
    global pkt_rec_count
    global pkt_success_count
+   global last_rec_pkt_id
+   global gcode_full_str
 
    status, bytes_rec, data = pi.bsc_i2c(I2C_ADDR) #status, num bytes, data
 
@@ -34,8 +38,8 @@ def i2c_loop(id, tick):
 
       if data[I2C_Packets.PACKET_ID] >= I2C_Packets.RPI_I2C_NUM_PKT_IDS:
          ack_pkt = I2C_Packets.RPI_I2C_Packet_ACK(C_FALSE)
-         print("NACK PACKET: ")
-         print(ack_pkt.raw)
+         print("ERROR: Invalid packet ID received!")
+         print("SENDING NACK PACKET")
          s, b, d = pi.bsc_i2c(I2C_ADDR, ack_pkt.raw)
          return
 
@@ -45,8 +49,7 @@ def i2c_loop(id, tick):
          # Error of some kind
          print("ERROR: Packet length mismatch! Len:" + str(bytes_rec))
          ack_pkt = I2C_Packets.RPI_I2C_Packet_ACK(C_FALSE)
-         print("NACK PACKET: ")
-         print(ack_pkt.raw)
+         print("SENDING NACK PACKET")
          s, b, d = pi.bsc_i2c(I2C_ADDR, ack_pkt.raw)
          return
 
@@ -56,25 +59,43 @@ def i2c_loop(id, tick):
       if data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_ERR_PKT_ID:
          print("Yeah!")
 
-      # -------------------------- GCODE PKT ID ----------------------------
-      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_GCODE_PKT_ID and bytes_rec == I2C_Packets.RPI_PACKET_MAX_LENGTHS[I2C_Packets.RPI_GCODE_PKT_ID]:
+      # -------------------------- GCODE 0 PKT ID ----------------------------
+      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_GCODE_0_PKT_ID and bytes_rec == I2C_Packets.RPI_PACKET_MAX_LENGTHS[I2C_Packets.RPI_GCODE_0_PKT_ID]:
          # Parse the data into the packet struct
-         pkt = I2C_Packets.RPI_I2C_Packet_GCode(data)
+         pkt = I2C_Packets.RPI_I2C_Packet_GCode_0(data)
 
          # If packet is valid
          if pkt.valid == C_TRUE:
             # Send the gcode to the SKR MINI E3 via the terminal
-            call(["echo", pkt.gcode_str, ">>", "/tmp/printer/"])
-
-            if pkt.gcode_str == "G28 012345678":
-               pkt_success_count += 1
+            gcode_full_str = pkt.gcode_str
 
             ack_pkt = I2C_Packets.RPI_I2C_Packet_ACK(C_TRUE)
             #print("ACK PACKET: ")
             #print(ack_pkt.raw)
             s, b, d = pi.bsc_i2c(I2C_ADDR, ack_pkt.raw)
+            # Set last received pkt ID, to know to expect a GCode 1 packet next
+            last_rec_pkt_id = I2C_Packets.RPI_GCODE_0_PKT_ID
 
-            print("[" + str(pkt_success_count) + "/" + str(pkt_rec_count) + "]")
+      # -------------------------- GCODE 1 PKT ID ----------------------------
+      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_GCODE_1_PKT_ID and bytes_rec == I2C_Packets.RPI_PACKET_MAX_LENGTHS[I2C_Packets.RPI_GCODE_1_PKT_ID]:
+         # Parse the data into the packet struct
+         pkt = I2C_Packets.RPI_I2C_Packet_GCode_1(data)
+
+         gcode_full_str += pkt.gcode_str
+         # Send the gcode to the SKR MINI E3 via the terminal
+         call(["echo", gcode_full_str, ">>", "/tmp/printer/"])
+
+         if gcode_full_str == "G28 012345678ABCDEFGHIJKLMNO":
+            pkt_success_count += 1
+
+         ack_pkt = I2C_Packets.RPI_I2C_Packet_ACK(C_TRUE)
+         #print("ACK PACKET: ")
+         #print(ack_pkt.raw)
+         s, b, d = pi.bsc_i2c(I2C_ADDR, ack_pkt.raw)
+         # Set last received pkt ID, to know to expect a GCode 1 packet next
+         last_rec_pkt_id = I2C_Packets.RPI_GCODE_1_PKT_ID
+
+         print("[" + str(pkt_success_count) + "/" + str((pkt_rec_count/2)) + "]")
 
 
       # ------------------------ AHT20 DATA PKT ID -------------------------
