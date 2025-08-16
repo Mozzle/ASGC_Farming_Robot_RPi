@@ -85,7 +85,7 @@ def i2c_loop(id, tick):
          # Send the gcode to the SKR MINI E3 via the terminal
          call(["echo", gcode_full_str, ">>", "/tmp/printer/"])
 
-         if gcode_full_str == "G28 012345678ABCDEFGHIJKLMNO":
+         if gcode_full_str == "G28 0123456789ABCDEFGHIJKLMNO":
             pkt_success_count += 1
 
          ack_pkt = I2C_Packets.RPI_I2C_Packet_ACK(C_TRUE)
@@ -148,4 +148,5 @@ time.sleep(800)
 e.cancel()
 pi.bsc_i2c(0) # Disable BSC peripheral
 pi.stop()
+print("Exiting")
 

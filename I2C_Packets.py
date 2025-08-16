@@ -60,7 +60,7 @@ class RPI_I2C_Packet_GCode_0:
             # Get packet validity from data
             self.valid = data[PACKET_VALID]
 
-        self.gcode_str = data[2:15].decode('UTF-8').strip()
+        self.gcode_str = data[2:16].decode('UTF-8').strip()
         self.gcode_str = self.gcode_str.replace('\x00', '')
 
 class RPI_I2C_Packet_GCode_1:
@@ -73,7 +73,7 @@ class RPI_I2C_Packet_GCode_1:
         if self.packet_id is not RPI_GCODE_1_PKT_ID:
             self.packet_id = RPI_ERR_PKT_ID
 
-        self.gcode_str = data[1:15].decode('UTF-8').strip()
+        self.gcode_str = data[1:16].decode('UTF-8').strip()
         self.gcode_str = self.gcode_str.replace('\x00', '')
 
 class RPI_I2C_Packet_ACK:
