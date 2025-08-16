@@ -8,6 +8,9 @@ RPI_WATER_DATA_PKT_ID       = 3
 RPI_BUTTONS_PKT_ID          = 4
 RPI_NET_POT_STATUS_PKT_ID   = 5
 RPI_GET_AXES_POS_PKT_ID     = 6
+RPI_ACK_PKT_ID              = 7
+
+RPI_I2C_NUM_PKT_IDS         = 8
 
 RPI_PACKET_MAX_LENGTHS     = [
     128,  # RPI_ERR_PKT_ID
@@ -51,4 +54,13 @@ class RPI_I2C_Packet_GCode:
 
         self.gcode_str = data[2:15].decode('UTF-8').strip()
         self.gcode_str = self.gcode_str.replace('\x00', '')
+
+class RPI_I2C_Packet_ACK:
+    def __init__(self, ack):
+        # Pack packet
+        self.packet_id = RPI_ACK_PKT_ID
+        self.ack = ack
+        # Get the raw byte representation of the packet
+        self.raw = ((self.packet_id << 4) | self.ack)
+
 

@@ -32,13 +32,21 @@ def i2c_loop(id, tick):
       #print(data[:-1])
       pkt_rec_count += 1
 
+      if data[I2C_Packets.PACKET_ID] >= I2C_Packets.RPI_I2C_NUM_PKT_IDS:
+         ack_pkt = I2C_Packets.RPI_I2C_Packet_ACK(C_FALSE)
+         print("NACK PACKET: " + bin(ack_pkt.raw))
+         s, b, d = pi.bsc_i2c(I2C_ADDR, ack_pkt.raw)
+         return
+
+
       # If the received data length does not match the expected packet size
       if bytes_rec is not I2C_Packets.RPI_PACKET_MAX_LENGTHS[data[I2C_Packets.PACKET_ID]]:
          # Error of some kind
          print("ERROR: Packet length mismatch! Len:" + str(bytes_rec))
-         print(data)
-         print(bin(status))
-         # Send back a 'data not received' pkt
+         ack_pkt = I2C_Packets.RPI_I2C_Packet_ACK(C_FALSE)
+         print("NACK PACKET: " + bin(ack_pkt.raw))
+         s, b, d = pi.bsc_i2c(I2C_ADDR, ack_pkt.raw)
+         return
 
 
       # Match the pkt_id
@@ -58,6 +66,10 @@ def i2c_loop(id, tick):
 
             if pkt.gcode_str == "G28 0123456789":
                pkt_success_count += 1
+
+            ack_pkt = I2C_Packets.RPI_I2C_Packet_ACK(C_TRUE)
+            print("ACK PACKET: " + bin(ack_pkt.raw))
+            s, b, d = pi.bsc_i2c(I2C_ADDR, ack_pkt.raw)
 
             print("GCode [" + str(pkt_success_count) + "/" + str(pkt_rec_count) + "]: " + pkt.gcode_str)
 
