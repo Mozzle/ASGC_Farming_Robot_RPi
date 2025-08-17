@@ -30,10 +30,6 @@ RPI_PACKET_MAX_LENGTHS     = [
     128   # RPI_GET_AXES_POS_PKT_ID
 ]
 
-RPI_PACKET_PAD_LENGTH       = 3
-
-RPI_I2C_PACKET_SIZE 		= 128
-
 PACKET_ID                   = 0
 PACKET_VALID                = 1
 

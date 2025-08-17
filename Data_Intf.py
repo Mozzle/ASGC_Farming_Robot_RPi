@@ -142,7 +142,8 @@ print("Starting I2C Data Interface...")
 # Respond to BSC slave activity, registering the i2c_loop as callback function
 e = pi.event_callback(pigpio.EVENT_BSC, i2c_loop)
 pi.bsc_i2c(I2C_ADDR) # Configure BSC as I2C slave
-time.sleep(800)
+while True:
+   time.sleep(1)
 
 # If the interface exits, gracefully shut down
 e.cancel()
