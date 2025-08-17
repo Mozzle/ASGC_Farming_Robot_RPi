@@ -81,7 +81,6 @@ def i2c_loop(id, tick):
 
          if last_rec_pkt_id == I2C_Packets.RPI_GCODE_0_PKT_ID:
             pkt = I2C_Packets.RPI_I2C_Packet_GCode_1(data)
-            pkt_success_count += 1
             gcode_full_str += pkt.gcode_str
 
             # Make and send the ACK packet
@@ -135,7 +134,7 @@ def i2c_loop(id, tick):
             # Set last received pkt ID, to know to expect a GCode 1 packet next
             last_rec_pkt_id = I2C_Packets.RPI_GCODE_4_PKT_ID
 
-            print("[" + str(pkt_success_count) + "/" + str((pkt_rec_count/2)) + "]")
+            print("[" + str(pkt_success_count) + "/" + str((pkt_rec_count/5)) + "]")
 
 
       # ------------------------ AHT20 DATA PKT ID -------------------------
