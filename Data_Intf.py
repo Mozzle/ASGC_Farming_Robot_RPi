@@ -79,23 +79,22 @@ def i2c_loop(id, tick):
       # -------------------------- GCODE 1 PKT ID ----------------------------
       elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_GCODE_1_PKT_ID and bytes_rec == I2C_Packets.RPI_PACKET_MAX_LENGTHS[I2C_Packets.RPI_GCODE_1_PKT_ID]:
          # Parse the data into the packet struct
-         pkt = I2C_Packets.RPI_I2C_Packet_GCode_1(data)
 
-         gcode_full_str += pkt.gcode_str
-         # Send the gcode to the SKR MINI E3 via the terminal
-         call(["echo", gcode_full_str, ">>", "/tmp/printer/"])
-
-         if gcode_full_str == "G28 0123456789ABCDEFGHIJKLMNO":
+         if last_rec_pkt_id == I2C_Packets.RPI_GCODE_0_PKT_ID:
+            pkt = I2C_Packets.RPI_I2C_Packet_GCode_1(data)
             pkt_success_count += 1
+            gcode_full_str += pkt.gcode_str
+            # Send the gcode to the SKR MINI E3 via the terminal
+            call(["echo", gcode_full_str, ">>", "/tmp/printer/"])
 
-         ack_pkt = I2C_Packets.RPI_I2C_Packet_ACK(C_TRUE)
-         #print("ACK PACKET: ")
-         #print(ack_pkt.raw)
-         s, b, d = pi.bsc_i2c(I2C_ADDR, ack_pkt.raw)
-         # Set last received pkt ID, to know to expect a GCode 1 packet next
-         last_rec_pkt_id = I2C_Packets.RPI_GCODE_1_PKT_ID
+            ack_pkt = I2C_Packets.RPI_I2C_Packet_ACK(C_TRUE)
+            #print("ACK PACKET: ")
+            #print(ack_pkt.raw)
+            s, b, d = pi.bsc_i2c(I2C_ADDR, ack_pkt.raw)
+            # Set last received pkt ID, to know to expect a GCode 1 packet next
+            last_rec_pkt_id = I2C_Packets.RPI_GCODE_1_PKT_ID
 
-         print("[" + str(pkt_success_count) + "/" + str((pkt_rec_count/2)) + "]")
+            print("[" + str(pkt_success_count) + "/" + str((pkt_rec_count/2)) + "]")
 
 
       # ------------------------ AHT20 DATA PKT ID -------------------------
@@ -142,8 +141,8 @@ print("Starting I2C Data Interface...")
 # Respond to BSC slave activity, registering the i2c_loop as callback function
 e = pi.event_callback(pigpio.EVENT_BSC, i2c_loop)
 pi.bsc_i2c(I2C_ADDR) # Configure BSC as I2C slave
-while True:
-   time.sleep(1)
+while pi.connected:
+   time.sleep(0.1)
 
 # If the interface exits, gracefully shut down
 e.cancel()
