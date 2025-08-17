@@ -72,6 +72,45 @@ class RPI_I2C_Packet_GCode_1:
         self.gcode_str = data[1:16].decode('UTF-8').strip()
         self.gcode_str = self.gcode_str.replace('\x00', '')
 
+class RPI_I2C_Packet_GCode_2:
+    def __init__(self, data):
+
+        # Get packet ID
+        self.packet_id = data[PACKET_ID]
+
+        # If the packet ID is not the gcode packet
+        if self.packet_id is not RPI_GCODE_2_PKT_ID:
+            self.packet_id = RPI_ERR_PKT_ID
+
+        self.gcode_str = data[1:16].decode('UTF-8').strip()
+        self.gcode_str = self.gcode_str.replace('\x00', '')
+
+class RPI_I2C_Packet_GCode_3:
+    def __init__(self, data):
+
+        # Get packet ID
+        self.packet_id = data[PACKET_ID]
+
+        # If the packet ID is not the gcode packet
+        if self.packet_id is not RPI_GCODE_3_PKT_ID:
+            self.packet_id = RPI_ERR_PKT_ID
+
+        self.gcode_str = data[1:16].decode('UTF-8').strip()
+        self.gcode_str = self.gcode_str.replace('\x00', '')
+
+class RPI_I2C_Packet_GCode_4:
+    def __init__(self, data):
+
+        # Get packet ID
+        self.packet_id = data[PACKET_ID]
+
+        # If the packet ID is not the gcode packet
+        if self.packet_id is not RPI_GCODE_4_PKT_ID:
+            self.packet_id = RPI_ERR_PKT_ID
+
+        self.gcode_str = data[1:16].decode('UTF-8').strip()
+        self.gcode_str = self.gcode_str.replace('\x00', '')
+
 class RPI_I2C_Packet_ACK:
     def __init__(self, ack):
         # Pack packet
