@@ -56,19 +56,19 @@ def get_current_state() -> PrinterInfo:
 def send_gcode_command(command: str) -> dict:
     """
     Send a G-code command to the OctoPrint server
-    
+
     Args:
         command (str): The G-code command to send (e.g., 'M112' for emergency stop)
-    
+
     Returns:
         dict: Response from OctoPrint API
     """
     url = f'{BASE_URL}/printer/command'
-    
+
     payload = {
         'command': command
     }
-    
+
     try:
         response = requests.post(url, headers=auth_header, json=payload)
         response.raise_for_status()  # Raises an HTTPError for bad responses
@@ -94,7 +94,7 @@ def send_gcode_command(command: str) -> dict:
 def emergency_stop() -> dict:
     """
     Send emergency stop command (M112) to the printer
-    
+
     Returns:
         dict: Response from the emergency stop command
     """

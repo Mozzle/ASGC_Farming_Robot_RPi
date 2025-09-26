@@ -23,7 +23,7 @@ def emergency_stop():
         # Get the command from the request (optional, defaults to M112)
         data = request.get_json() or {}
         command = data.get('command', 'M112')
-        
+
         # Validate that it's an emergency stop command
         if command != 'M112':
             return jsonify({
@@ -31,10 +31,10 @@ def emergency_stop():
                 'error': 'Invalid command',
                 'message': 'Only M112 emergency stop command is allowed'
             }), 400
-        
+
         # Send the emergency stop command via octoprint module
         result = octoprint.emergency_stop()
-        
+
         if result['success']:
             return jsonify({
                 'success': True,
@@ -47,7 +47,7 @@ def emergency_stop():
                 'error': result.get('error', 'Unknown error'),
                 'message': result.get('message', 'Failed to send emergency stop')
             }), 500
-            
+
     except Exception as e:
         return jsonify({
             'success': False,
