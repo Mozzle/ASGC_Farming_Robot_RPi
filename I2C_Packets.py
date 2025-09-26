@@ -1,3 +1,4 @@
+import struct
 import enum
 
 ''' ------------------------------------------------------------------------
@@ -118,6 +119,56 @@ class RPI_I2C_Packet_GCode_4:
 
         self.gcode_str = data[1:16].decode('UTF-8').strip()
         self.gcode_str = self.gcode_str.replace('\x00', '')
+
+class RPI_I2C_Packet_AHT20:
+
+    packet_id: int
+    valid: bool
+    temperature: float
+    humidity: float
+
+    def __init__(self, data):
+        self.packet_id = I2CPackets.RPI_AHT20_PKT_ID
+
+        # Ignore 2:4 because it's padding?
+        self.temperature = struct.unpack('>f', data[5:9])[0] # surely a float is 4 bytes right
+        self.humidity = struct.unpack('>f', data[9:13])[0]
+
+class RPI_I2C_PACKET_SEN0169:
+
+    packet_id: int
+    ph: float
+
+    def __init__(self, data: bytearray):
+        self.packet_id = I2CPackets.RPI_SEN0169_PKT_ID
+        self.ph = struct.unpack('>d', data[5:9])[0]
+
+class RPI_I2C_PACKET_SEN0244:
+
+    packet_id: int
+    TDS: float
+
+    def __init__(self, data: bytearray):
+        self.packet_id = I2CPackets.RPI_SEN0244_PKT_ID
+        self.TDS = struct.unpack('>d', data[5:9])[0]
+
+class RPI_I2C_PACKET_AS7341_0:
+
+    packet_id: int
+    data: bytearray
+
+    def __init__(self, data: bytearray):
+        self.packet_id = I2CPackets.RPI_AS7341_0_PKT_ID
+        self.data = data[5:12]
+
+class RPI_i2C_PACKET_AS7341_1:
+
+    packet_id: int
+    data: bytearray
+
+    def __init__(self, data: bytearray):
+        self.packet_id = I2CPackets.RPI_AS7341_1_PKT_ID
+        self.data = data[5:10]
 
 class RPI_I2C_Packet_ACK:
     def __init__(self, ack):
