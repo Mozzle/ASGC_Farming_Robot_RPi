@@ -36,7 +36,7 @@ def i2c_loop(id, tick):
       #print(data[:-1])
       pkt_rec_count += 1
 
-      if data[I2C_Packets.PACKET_ID] >= I2C_Packets.RPI_I2C_NUM_PKT_IDS:
+      if data[I2C_Packets.PACKET_ID] >= I2C_Packets.I2CPackets.RPI_I2C_NUM_PKT_IDS:
          ack_pkt = I2C_Packets.RPI_I2C_Packet_ACK(C_FALSE)
          print("ERROR: Invalid packet ID received!")
          print("SENDING NACK PACKET")
@@ -56,11 +56,11 @@ def i2c_loop(id, tick):
 
       # Match the pkt_id
       # -------------------------- ERROR PKT ID ----------------------------
-      if data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_ERR_PKT_ID:
+      if data[I2C_Packets.PACKET_ID] == I2C_Packets.I2CPackets.RPI_ERR_PKT_ID:
          print("Yeah!")
 
       # -------------------------- GCODE 0 PKT ID ----------------------------
-      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_GCODE_0_PKT_ID and bytes_rec == I2C_Packets.RPI_PACKET_MAX_LENGTHS[I2C_Packets.RPI_GCODE_0_PKT_ID]:
+      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.I2CPackets.RPI_GCODE_0_PKT_ID and bytes_rec == I2C_Packets.RPI_PACKET_MAX_LENGTHS[I2C_Packets.I2CPackets.RPI_GCODE_0_PKT_ID]:
          # Parse the data into the packet struct
          pkt = I2C_Packets.RPI_I2C_Packet_GCode_0(data)
 
@@ -73,13 +73,13 @@ def i2c_loop(id, tick):
             ack_pkt = I2C_Packets.RPI_I2C_Packet_ACK(C_TRUE)
             s, b, d = pi.bsc_i2c(I2C_ADDR, ack_pkt.raw)
             # Set last received pkt ID, to know to expect a GCode 1 packet next
-            last_rec_pkt_id = I2C_Packets.RPI_GCODE_0_PKT_ID
+            last_rec_pkt_id = I2C_Packets.I2CPackets.RPI_GCODE_0_PKT_ID
 
       # -------------------------- GCODE 1 PKT ID ----------------------------
-      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_GCODE_1_PKT_ID and bytes_rec == I2C_Packets.RPI_PACKET_MAX_LENGTHS[I2C_Packets.RPI_GCODE_1_PKT_ID]:
+      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.I2CPackets.RPI_GCODE_1_PKT_ID and bytes_rec == I2C_Packets.RPI_PACKET_MAX_LENGTHS[I2C_Packets.I2CPackets.RPI_GCODE_1_PKT_ID]:
          # Parse the data into the packet struct
 
-         if last_rec_pkt_id == I2C_Packets.RPI_GCODE_0_PKT_ID:
+         if last_rec_pkt_id == I2C_Packets.I2CPackets.RPI_GCODE_0_PKT_ID:
             pkt = I2C_Packets.RPI_I2C_Packet_GCode_1(data)
             gcode_full_str += pkt.gcode_str
 
@@ -87,13 +87,13 @@ def i2c_loop(id, tick):
             ack_pkt = I2C_Packets.RPI_I2C_Packet_ACK(C_TRUE)
             s, b, d = pi.bsc_i2c(I2C_ADDR, ack_pkt.raw)
             # Set last received pkt ID, to know to expect a GCode 1 packet next
-            last_rec_pkt_id = I2C_Packets.RPI_GCODE_1_PKT_ID
+            last_rec_pkt_id = I2C_Packets.I2CPackets.RPI_GCODE_1_PKT_ID
 
       # -------------------------- GCODE 2 PKT ID ----------------------------
-      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_GCODE_2_PKT_ID and bytes_rec == I2C_Packets.RPI_PACKET_MAX_LENGTHS[I2C_Packets.RPI_GCODE_2_PKT_ID]:
+      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.I2CPackets.RPI_GCODE_2_PKT_ID and bytes_rec == I2C_Packets.RPI_PACKET_MAX_LENGTHS[I2C_Packets.I2CPackets.RPI_GCODE_2_PKT_ID]:
          # Parse the data into the packet struct
 
-         if last_rec_pkt_id == I2C_Packets.RPI_GCODE_1_PKT_ID:
+         if last_rec_pkt_id == I2C_Packets.I2CPackets.RPI_GCODE_1_PKT_ID:
             pkt = I2C_Packets.RPI_I2C_Packet_GCode_2(data)
             gcode_full_str += pkt.gcode_str
 
@@ -101,13 +101,13 @@ def i2c_loop(id, tick):
             ack_pkt = I2C_Packets.RPI_I2C_Packet_ACK(C_TRUE)
             s, b, d = pi.bsc_i2c(I2C_ADDR, ack_pkt.raw)
             # Set last received pkt ID, to know to expect a GCode 1 packet next
-            last_rec_pkt_id = I2C_Packets.RPI_GCODE_2_PKT_ID
+            last_rec_pkt_id = I2C_Packets.I2CPackets.RPI_GCODE_2_PKT_ID
 
       # -------------------------- GCODE 3 PKT ID ----------------------------
-      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_GCODE_3_PKT_ID and bytes_rec == I2C_Packets.RPI_PACKET_MAX_LENGTHS[I2C_Packets.RPI_GCODE_3_PKT_ID]:
+      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.I2CPackets.RPI_GCODE_3_PKT_ID and bytes_rec == I2C_Packets.RPI_PACKET_MAX_LENGTHS[I2C_Packets.I2CPackets.RPI_GCODE_3_PKT_ID]:
          # Parse the data into the packet struct
 
-         if last_rec_pkt_id == I2C_Packets.RPI_GCODE_2_PKT_ID:
+         if last_rec_pkt_id == I2C_Packets.I2CPackets.RPI_GCODE_2_PKT_ID:
             pkt = I2C_Packets.RPI_I2C_Packet_GCode_3(data)
             gcode_full_str += pkt.gcode_str
 
@@ -115,13 +115,13 @@ def i2c_loop(id, tick):
             ack_pkt = I2C_Packets.RPI_I2C_Packet_ACK(C_TRUE)
             s, b, d = pi.bsc_i2c(I2C_ADDR, ack_pkt.raw)
             # Set last received pkt ID, to know to expect a GCode 1 packet next
-            last_rec_pkt_id = I2C_Packets.RPI_GCODE_3_PKT_ID
+            last_rec_pkt_id = I2C_Packets.I2CPackets.RPI_GCODE_3_PKT_ID
 
       # -------------------------- GCODE 4 PKT ID ----------------------------
-      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_GCODE_4_PKT_ID and bytes_rec == I2C_Packets.RPI_PACKET_MAX_LENGTHS[I2C_Packets.RPI_GCODE_4_PKT_ID]:
+      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.I2CPackets.RPI_GCODE_4_PKT_ID and bytes_rec == I2C_Packets.RPI_PACKET_MAX_LENGTHS[I2C_Packets.I2CPackets.RPI_GCODE_4_PKT_ID]:
          # Parse the data into the packet struct
 
-         if last_rec_pkt_id == I2C_Packets.RPI_GCODE_3_PKT_ID:
+         if last_rec_pkt_id == I2C_Packets.I2CPackets.RPI_GCODE_3_PKT_ID:
             pkt = I2C_Packets.RPI_I2C_Packet_GCode_4(data)
             pkt_success_count += 1
             gcode_full_str += pkt.gcode_str
@@ -132,29 +132,29 @@ def i2c_loop(id, tick):
             ack_pkt = I2C_Packets.RPI_I2C_Packet_ACK(C_TRUE)
             s, b, d = pi.bsc_i2c(I2C_ADDR, ack_pkt.raw)
             # Set last received pkt ID, to know to expect a GCode 1 packet next
-            last_rec_pkt_id = I2C_Packets.RPI_GCODE_4_PKT_ID
+            last_rec_pkt_id = I2C_Packets.I2CPackets.RPI_GCODE_4_PKT_ID
 
             print("[" + str(pkt_success_count) + "/" + str((pkt_rec_count/5)) + "]")
 
 
       # ------------------------ AHT20 DATA PKT ID -------------------------
-      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_AHT20_PKT_ID:
+      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.I2CPackets.RPI_AHT20_PKT_ID:
          print("Else!")
 
       # ------------------------ WATER DATA PKT ID -------------------------
-      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_WATER_DATA_PKT_ID:
-         pass
+      # elif data[I2C_Packets.PACKET_ID] == I2C_Packets.I2CPackets.RPI_WATER_DATA_PKT_ID:
+      #    pass
 
       # ----------------------- BUTTONS DATA PKT ID ------------------------
-      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_BUTTONS_PKT_ID:
+      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.I2CPackets.RPI_BUTTONS_PKT_ID:
          pass
 
       # ---------------------- NET POT STATUS PKT ID -----------------------
-      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_NET_POT_STATUS_PKT_ID:
+      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.I2CPackets.RPI_NET_POT_STATUS_PKT_ID:
          pass
 
       # ------------------ GET AXES DATA REQUEST PKT ID --------------------
-      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.RPI_GET_AXES_POS_PKT_ID:
+      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.I2CPackets.RPI_GET_AXES_POS_PKT_ID:
          pass
 
       # -------------------------- DEFAULT CASE ----------------------------
