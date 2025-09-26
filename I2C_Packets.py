@@ -1,5 +1,7 @@
+import datetime
 import struct
 import enum
+import pytz
 
 ''' ------------------------------------------------------------------------
 I2C Packet IDs
@@ -24,6 +26,7 @@ class I2CPackets(enum.IntEnum):
     RPI_ACK_PKT_ID              = 14
 
     RPI_I2C_NUM_PKT_IDS         = 15
+    RPI_I2C_UNIX_TIME           = 16
 
 RPI_PACKET_MAX_LENGTHS     = [
     128,  # RPI_ERR_PKT_ID
@@ -179,4 +182,18 @@ class RPI_I2C_Packet_ACK:
         self.raw = ((self.packet_id << 8) | self.ack)
         self.raw = self.raw.to_bytes(2, byteorder='big')
 
+class RPI_I2C_PACKET_UNIX_TIME:
 
+    packet_id: int
+    now: float
+
+    raw: bytes
+
+    def __init__(self):
+        self.packet_id = I2CPackets.RPI_I2C_UNIX_TIME
+
+        self.now = datetime.datetime.now(tz=pytz.timezone('US/Central')).timestamp()
+
+        self.raw = bytearray(16)
+        self.raw[0] = self.packet_id
+        self.raw[1:9] = struct.pack('>d', self.now)

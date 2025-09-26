@@ -157,6 +157,11 @@ def i2c_loop(id, tick):
       elif data[I2C_Packets.PACKET_ID] == I2C_Packets.I2CPackets.RPI_GET_AXES_POS_PKT_ID:
          pass
 
+      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.I2CPackets.RPI_I2C_UNIX_TIME:
+         pkt = I2C_Packets.RPI_I2C_PACKET_UNIX_TIME()
+
+         s, b, d = pi.bsc_i2c(I2C_ADDR, pkt.raw)
+
       # -------------------------- DEFAULT CASE ----------------------------
       else:
          print("okay")
