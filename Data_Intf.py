@@ -162,6 +162,8 @@ def i2c_loop(id, tick):
 
          s, b, d = pi.bsc_i2c(I2C_ADDR, pkt.raw)
 
+         print(f"Sent UNIX Time Packet. Current time : {pkt.now}")
+
       # -------------------------- DEFAULT CASE ----------------------------
       else:
          print("okay")
