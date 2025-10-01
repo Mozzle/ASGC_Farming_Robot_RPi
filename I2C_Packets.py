@@ -138,8 +138,8 @@ class RPI_I2C_Packet_AHT20:
             self.valid = data[PACKET_VALID]
 
         # extract the temperature and humidity values from the byte data
-        self.temperature = struct.unpack('>f', data[4:8])[0]
-        self.humidity = struct.unpack('>f', data[8:12])[0]
+        self.temperature = struct.unpack('<f', data[4:8])[0]
+        self.humidity = struct.unpack('<f', data[8:12])[0]
 
 class RPI_I2C_Packet_ACK:
     def __init__(self, ack):
@@ -164,7 +164,7 @@ class RPI_I2C_Packet_SEN0169:
             self.valid = True
 
         # extract the pH value from the byte data
-        self.pH = struct.unpack('>d', data[4:12])[0]
+        self.pH = struct.unpack('<d', data[8:16])[0]
 
 class RPI_I2C_Packet_SEN0244:
     def __init__(self, data):
@@ -180,7 +180,7 @@ class RPI_I2C_Packet_SEN0244:
             self.valid = True
 
         # extract the TDS value from the byte data
-        self.tds = struct.unpack('>d', data[4:12])[0]
+        self.tds = struct.unpack('<d', data[8:16])[0]
 
 class RPI_I2C_Packet_AS7341_0:
     def __init__(self, data):

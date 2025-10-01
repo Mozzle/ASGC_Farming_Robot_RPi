@@ -148,7 +148,7 @@ def i2c_loop(id, tick):
             s, b, d = pi.bsc_i2c(I2C_ADDR, ack_pkt.raw)
             last_rec_pkt_id = I2C_Packets.RPI_AHT20_PKT_ID
 
-            print("Temp: " + str(pkt.temperature) + "C, Humidity: " + str(pkt.humidity) + "%")
+            print("Temp: " + str(pkt.temperature) + "C, Humidity: " + str(pkt.humidity * 100) + "%")
 
             # FORWARD THE pkt.temperature and pkt.humidity VALUES TO WEB SERVER HERE
 
