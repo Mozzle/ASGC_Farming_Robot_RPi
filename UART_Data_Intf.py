@@ -83,7 +83,7 @@ def UART_LOOP():
 			pkt = UART_Packets.RPI_UART_Packet_SEN0244(bytes_rec)
 
 			if pkt.valid == C_TRUE:
-				print("SEN0244 TDS: " + str(pkt.TDS) + " ppm")
+				print("SEN0244 TDS: " + str(pkt.tds) + " ppm")
 
 				# DO SOMETHING WITH THE SEN0244 DATA HERE
 
@@ -100,8 +100,7 @@ def UART_LOOP():
 			pkt = UART_Packets.RPI_UART_Packet_AS7341(bytes_rec)
 
 			if pkt.valid == C_TRUE:
-				print("AS7341 Data: " + str(pkt.channel_data))
-
+				print("AS7341 CH0: " + str(pkt.channel_0) + " CH1: " + str(pkt.channel_1) + " CH2: " + str(pkt.channel_2) + " CH3: " + str(pkt.channel_3) + " CH4: " + str(pkt.channel_4) + " CH5: " + str(pkt.channel_5) + " CH6: " + str(pkt.channel_6) + " CH7: " + str(pkt.channel_7) + " CH8: " + str(pkt.channel_8) + " CH9: " + str(pkt.channel_9) + " CH10: " + str(pkt.channel_10))
 				# DO SOMETHING WITH THE AS7341 DATA HERE
 
 				# Make and send the ACK packet

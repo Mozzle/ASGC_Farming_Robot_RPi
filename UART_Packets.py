@@ -81,7 +81,7 @@ class RPI_UART_Packet_SEN0244:
 		else:
 			self.valid = 1
 			
-		self.pH = struct.unpack('<d', data[1:9])[0]
+		self.tds = struct.unpack('<d', data[1:9])[0]
 
 class RPI_UART_Packet_AS7341:
 	def __init__(self, data):
