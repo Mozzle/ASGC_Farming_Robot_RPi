@@ -60,7 +60,9 @@ def UART_LOOP():
 	# -------------------------- SEN0169 PKT ID --------------------------
 	elif pkt_id == UART_Packets.RPI_SEN0169_PKT_ID:
 		bytes_rec = port.read(UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.RPI_SEN0169_PKT_ID])
+		print("sen0169 1")
 		if len(bytes_rec) == UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.RPI_SEN0169_PKT_ID]:
+			print("sen0169 2")
 			pkt = UART_Packets.RPI_UART_Packet_SEN0169(bytes_rec)
 
 			if pkt.valid == C_TRUE:
