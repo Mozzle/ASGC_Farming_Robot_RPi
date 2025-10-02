@@ -30,12 +30,14 @@ def UART_LOOP():
 			if pkt.valid == C_TRUE:
 				gcode_full_str = pkt.gcode_str
 
-				# Make and send the ACK packet
-				ack_pkt = UART_Packets.RPI_UART_Packet_ACK(C_TRUE)
-				port.write(ack_pkt.raw)
+				port.reset_input_buffer()
 
 				# Send the gcode to the SKR MINI E3 via the terminal
 				call(["echo", gcode_full_str, ">>", "/tmp/printer/"])
+
+				# Make and send the ACK packet
+				ack_pkt = UART_Packets.RPI_UART_Packet_ACK(C_TRUE)
+				port.write(ack_pkt.raw)
 		
 		else:
 			print("Error: Incomplete GCode Packet")
