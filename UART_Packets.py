@@ -95,17 +95,17 @@ class RPI_UART_Packet_AS7341:
 			# Get packet validity from data
 			self.valid = 1
 
-		self.channel_0 = struct.unpack('>H', data[1:3])[0]
-		self.channel_1 = struct.unpack('>H', data[3:5])[0]
-		self.channel_2 = struct.unpack('>H', data[5:7])[0]
-		self.channel_3 = struct.unpack('>H', data[7:9])[0]
-		self.channel_4 = struct.unpack('>H', data[9:11])[0]
-		self.channel_5 = struct.unpack('>H', data[11:13])[0]
-		self.channel_6 = struct.unpack('>H', data[13:15])[0]
-		self.channel_7 = struct.unpack('>H', data[15:17])[0]
-		self.channel_8 = struct.unpack('>H', data[17:19])[0]
-		self.channel_9 = struct.unpack('>H', data[19:21])[0]
-		self.channel_10 = struct.unpack('>H', data[21:23])[0]
+		self.channel_0 = struct.unpack('<H', data[1:3])[0]
+		self.channel_1 = struct.unpack('<H', data[3:5])[0]
+		self.channel_2 = struct.unpack('<H', data[5:7])[0]
+		self.channel_3 = struct.unpack('<H', data[7:9])[0]
+		self.channel_4 = struct.unpack('<H', data[9:11])[0]
+		self.channel_5 = struct.unpack('<H', data[11:13])[0]
+		self.channel_6 = struct.unpack('<H', data[13:15])[0]
+		self.channel_7 = struct.unpack('<H', data[15:17])[0]
+		self.channel_8 = struct.unpack('<H', data[17:19])[0]
+		self.channel_9 = struct.unpack('<H', data[19:21])[0]
+		self.channel_10 = struct.unpack('<H', data[21:23])[0]
 
 class RPI_UART_Packet_UNIX_TIME:
 	def __init__(self, unixTimeSec: int, unixTimezone: int):
