@@ -36,7 +36,6 @@ def UART_LOOP():
             	# Make and send the ACK packet
 				ack_pkt = UART_Packets.RPI_UART_Packet_ACK(C_TRUE)
 				port.write(ack_pkt.raw)
-				time.sleep(0.005) # sleep 5ms
 		
 		else:
 			print("Error: Incomplete GCode Packet")
@@ -55,7 +54,6 @@ def UART_LOOP():
 				# Make and send the ACK packet
 				ack_pkt = UART_Packets.RPI_UART_Packet_ACK(C_TRUE)
 				port.write(ack_pkt.raw)
-				time.sleep(0.005) # sleep 5ms
 		else: 
 			print("Error: Incomplete AHT20 Packet")
 
@@ -75,7 +73,6 @@ def UART_LOOP():
 				# Make and send the ACK packet
 				ack_pkt = UART_Packets.RPI_UART_Packet_ACK(C_TRUE)
 				port.write(ack_pkt.raw)
-				time.sleep(0.005) # sleep 5ms
 		else:
 			print("Error: Incomplete SEN0169 Packet")
 
@@ -93,7 +90,6 @@ def UART_LOOP():
 				# Make and send the ACK packet
 				ack_pkt = UART_Packets.RPI_UART_Packet_ACK(C_TRUE)
 				port.write(ack_pkt.raw)
-				time.sleep(0.005) # sleep 5ms
 		else:
 			print("Error: Incomplete SEN0244 Packet")
 
@@ -110,7 +106,6 @@ def UART_LOOP():
 				# Make and send the ACK packet
 				ack_pkt = UART_Packets.RPI_UART_Packet_ACK(C_TRUE)
 				port.write(ack_pkt.raw)
-				time.sleep(0.005) # sleep 5ms
 		else:
 			print("Error: Incomplete AS7341 Packet")
 
@@ -126,7 +121,6 @@ def UART_LOOP():
 			# Send the UNIX time packet back to the RPi
 			unix_time_pkt = UART_Packets.RPI_UART_Packet_UNIX_TIME(unix_time, timezone)
 			port.write(unix_time_pkt.raw)
-			time.sleep(0.005) # sleep 5ms
 
 		else:
 			print("Error: Incomplete UNIX Time Request Packet")
