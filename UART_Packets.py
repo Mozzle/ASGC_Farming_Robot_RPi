@@ -114,7 +114,7 @@ class RPI_UART_Packet_UNIX_TIME:
 		self.unixTimezone = unixTimezone
 
 		# Get the raw byte representation of the packet
-		self.raw = struct.pack('>BIB', self.packet_id, self.unixTimeSec, self.unixTimezone)
+		self.raw = struct.pack('<BIb', int(self.packet_id), self.unixTimeSec, int(self.unixTimezone))
 
 class RPI_UART_Packet_UNIX_TIME_Request:
 	def __init__(self, data):
