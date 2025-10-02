@@ -115,7 +115,7 @@ def UART_LOOP():
 	elif pkt_id == UART_Packets.RPI_UNIX_TIME_REQUEST_PKT_ID:
 		# Get the current UNIX time
 		unix_time = int(time.time())
-		timezone = int(datetime.now().astimezone().strftime("%z") / 100)  # in hours
+		timezone = int(datetime.now().astimezone().strftime("%z")) / 100  # in hours
 		print("Sending Unix Time: " + str(unix_time) + ", TZ: " + str(timezone))
 
 		# Send the UNIX time packet back to the RPi
