@@ -130,7 +130,7 @@ def UART_LOOP():
    Program Entry Point
    ------------------------------------------------------------------------ '''
 
-port = serial.Serial("/dev/ttyS0", baudrate=115200, timeout=0.5)
+port = serial.Serial("/dev/ttyAMA0", baudrate=115200, timeout=0.5)
 
 while True:
     UART_LOOP()
