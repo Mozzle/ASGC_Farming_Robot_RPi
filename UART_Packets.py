@@ -39,7 +39,7 @@ class RPI_UART_Packet_GCode:
 		if self.packet_id is not RPI_GCODE_PKT_ID:
 			self.valid = 0
 		else:
-			self.valid = data[1]
+			self.valid = 1
 
 		self.gcode_str = data[2:102].decode('utf-8').replace('\x00', '')
 
@@ -49,7 +49,7 @@ class RPI_UART_Packet_AHT20:
 		if self.packet_id is not RPI_AHT20_PKT_ID:
 			self.valid = 0
 		else:
-			self.valid = data[1]
+			self.valid = 1
 		self.temperature = struct.unpack('<f', data[2:6])[0]
 		self.humidity = struct.unpack('<f', data[6:10])[0]
 
@@ -68,7 +68,7 @@ class RPI_UART_Packet_SEN0169:
 		if self.packet_id is not RPI_SEN0169_PKT_ID:
 			self.valid = 0
 		else:
-			self.valid = data[1]
+			self.valid = 1
 
 		self.pH = struct.unpack('<d', data[1:9])[0]
 
@@ -79,7 +79,7 @@ class RPI_UART_Packet_SEN0244:
 		if self.packet_id is not RPI_SEN0244_PKT_ID:
 			self.valid = 0
 		else:
-			self.valid = data[1]
+			self.valid = 1
 			
 		self.pH = struct.unpack('<d', data[1:9])[0]
 
@@ -90,10 +90,10 @@ class RPI_UART_Packet_AS7341:
 
     	# If the packet ID is not the AS7341_0 packet
 		if self.packet_id is not RPI_AS7341_PKT_ID:
-			self.valid = False
+			self.valid = 0
 		else:
 			# Get packet validity from data
-			self.valid = True
+			self.valid = 1
 
 		self.channel_0 = struct.unpack('>H', data[1:3])[0]
 		self.channel_1 = struct.unpack('>H', data[3:5])[0]
