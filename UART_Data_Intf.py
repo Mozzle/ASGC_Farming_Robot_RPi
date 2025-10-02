@@ -14,6 +14,8 @@ def UART_LOOP():
 		pkt_id = port.read(1)
 		pkt_id = int.from_bytes(pkt_id, "big")
 		print ("Packet ID: " + str(pkt_id))
+	else:
+		return
     
 	if pkt_id >= UART_Packets.RPI_UART_NUM_PKT_IDS:
 		print("Invalid Packet ID: " + str(pkt_id))
