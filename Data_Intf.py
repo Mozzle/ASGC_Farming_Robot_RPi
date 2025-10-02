@@ -125,7 +125,7 @@ def UART_LOOP():
 			port.write(unix_time_pkt.raw)
 
 		else:
-			print("Error: Incomplete UNIX Time Request Packet")
+			print("Error: Incomplete UNIX Time Request Packet: " + str(len(bytes_rec)) + " bytes received")
 
 	else:
 		print("Unhandled Packet ID: " + str(pkt_id))
