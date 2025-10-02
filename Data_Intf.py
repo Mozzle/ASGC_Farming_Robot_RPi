@@ -32,6 +32,18 @@ def i2c_loop(id, tick):
 
    status, bytes_rec, data = pi.bsc_i2c(I2C_ADDR) #status, num bytes, data
 
+   bytesCopiedToTransmit = int.from_bytes(status[0:5], byteorder='big', signed=False)
+   bytesInRecFIFO = int.from_bytes(status[5:10], byteorder='big', signed=False)
+   bytesInTxFIFO = int.from_bytes(status[10:15], byteorder='big', signed=False)
+   receiveBusy = bool(status[15])
+   transmitFifoEmpty = bool(status[16])
+   rxFifoFull = bool(status[17])
+   txFifoFull = bool(status[18])
+   rxFifoEmpty = bool(status[19])
+   txBusy = bool(status[20])
+
+   print("Bytes copied to transmit: " + str(bytesCopiedToTransmit) + ", Bytes in RX FIFO: " + str(bytesInRecFIFO) + ", Bytes in TX FIFO: " + str(bytesInTxFIFO) + ", Receive Busy: " + str(receiveBusy) + ", Transmit FIFO Empty: " + str(transmitFifoEmpty) + ", RX FIFO Full: " + str(rxFifoFull) + ", TX FIFO Full: " + str(txFifoFull) + ", RX FIFO Empty: " + str(rxFifoEmpty) + ", TX Busy: " + str(txBusy))
+
    # If we received data
    if bytes_rec:
       #print(data[:-1])
