@@ -113,19 +113,14 @@ def UART_LOOP():
 
 	# --------------------- UNIX TIME REQUEST PKT ID ---------------------
 	elif pkt_id == UART_Packets.RPI_UNIX_TIME_REQUEST_PKT_ID:
-		bytes_rec = port.read(UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.RPI_UNIX_TIME_REQUEST_PKT_ID])
-		if len(bytes_rec) == UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.RPI_UNIX_TIME_REQUEST_PKT_ID]:
-			# Get the current UNIX time
-			unix_time = int(time.time())
-			timezone = int(datetime.now().astimezone().strftime("%z") / 100)  # in hours
-			print("Sending Unix Time: " + str(unix_time) + ", TZ: " + str(timezone))
+		# Get the current UNIX time
+		unix_time = int(time.time())
+		timezone = int(datetime.now().astimezone().strftime("%z") / 100)  # in hours
+		print("Sending Unix Time: " + str(unix_time) + ", TZ: " + str(timezone))
 
-			# Send the UNIX time packet back to the RPi
-			unix_time_pkt = UART_Packets.RPI_UART_Packet_UNIX_TIME(unix_time, timezone)
-			port.write(unix_time_pkt.raw)
-
-		else:
-			print("Error: Incomplete UNIX Time Request Packet: " + str(len(bytes_rec)) + " bytes received")
+		# Send the UNIX time packet back to the RPi
+		unix_time_pkt = UART_Packets.RPI_UART_Packet_UNIX_TIME(unix_time, timezone)
+		port.write(unix_time_pkt.raw)
 
 	else:
 		print("Unhandled Packet ID: " + str(pkt_id))
