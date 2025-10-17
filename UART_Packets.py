@@ -1,19 +1,21 @@
 import struct
+import enum
 
-RPI_ERR_PKT_ID					= 0
-RPI_GCODE_PKT_ID				= 1	
-RPI_AHT20_PKT_ID				= 2
-RPI_SEN0169_PKT_ID				= 3
-RPI_SEN0244_PKT_ID				= 4
-RPI_AS7341_PKT_ID				= 5
-RPI_BUTTONS_PKT_ID				= 6
-RPI_NET_POT_STATUS_PKT_ID		= 7
-RPI_GET_AXES_POS_PKT_ID			= 8
-RPI_ACK_PKT_ID					= 9
-RPI_UNIX_TIME_REQUEST_PKT_ID	= 10
-RPI_UNIX_TIME_PKT_ID			= 11
+class UARTPackets(enum.IntEnum):
 
-RPI_UART_NUM_PKT_IDS			= 12
+    RPI_ERR_PKT_ID				  = 0
+    RPI_GCODE_PKT_ID              = 1
+    RPI_AHT20_PKT_ID              = 2
+    RPI_SEN0169_PKT_ID            = 3
+    RPI_SEN0244_PKT_ID            = 4
+    RPI_AS7341_PKT_ID             = 5
+    # RPI_WATER_DATA_PKT_ID       = 8
+    RPI_BUTTONS_PKT_ID            = 6
+    RPI_NET_POT_STATUS_PKT_ID     = 7
+    RPI_GET_AXES_POS_PKT_ID       = 8
+    RPI_ACK_PKT_ID                = 9
+    RPI_UNIX_TIME_REQUEST_PKT_ID  = 10
+    RPI_UNIX_TIME_PKT_ID          = 11
 
 RPI_PACKET_LENGTHS     = [
 	0,  # RPI_ERR_PKT_ID
@@ -36,7 +38,7 @@ PACKET_VALID			   = 1
 class RPI_UART_Packet_GCode:
 	def __init__(self, data):
 		self.packet_id = data[0]
-		if self.packet_id is not RPI_GCODE_PKT_ID:
+		if self.packet_id is not UARTPackets.RPI_GCODE_PKT_ID:
 			self.valid = 0
 		else:
 			self.valid = 1
@@ -46,7 +48,7 @@ class RPI_UART_Packet_GCode:
 class RPI_UART_Packet_AHT20:
 	def __init__(self, data):
 		self.packet_id = data[0]
-		if self.packet_id is not RPI_AHT20_PKT_ID:
+		if self.packet_id is not UARTPackets.RPI_AHT20_PKT_ID:
 			self.valid = 0
 		else:
 			self.valid = 1
@@ -55,7 +57,7 @@ class RPI_UART_Packet_AHT20:
 
 class RPI_UART_Packet_ACK:
 	def __init__(self, ack):
-		self.packet_id = RPI_ACK_PKT_ID
+		self.packet_id = UARTPackets.RPI_ACK_PKT_ID
 		self.ack = ack
 		# Get the raw byte representation of the packet
 		self.raw = ((self.packet_id << 8) | self.ack)
@@ -65,7 +67,7 @@ class RPI_UART_Packet_SEN0169:
 	def __init__(self, data):
 		self.packet_id = data[0]
 
-		if self.packet_id is not RPI_SEN0169_PKT_ID:
+		if self.packet_id is not UARTPackets.RPI_SEN0169_PKT_ID:
 			self.valid = 0
 		else:
 			self.valid = 1
@@ -76,11 +78,11 @@ class RPI_UART_Packet_SEN0244:
 	def __init__(self, data):
 		self.packet_id = data[0]
 
-		if self.packet_id is not RPI_SEN0244_PKT_ID:
+		if self.packet_id is not UARTPackets.RPI_SEN0244_PKT_ID:
 			self.valid = 0
 		else:
 			self.valid = 1
-			
+
 		self.tds = struct.unpack('<d', data[1:9])[0]
 
 class RPI_UART_Packet_AS7341:
@@ -89,7 +91,7 @@ class RPI_UART_Packet_AS7341:
 		self.packet_id = data[PACKET_ID]
 
     	# If the packet ID is not the AS7341_0 packet
-		if self.packet_id is not RPI_AS7341_PKT_ID:
+		if self.packet_id is not UARTPackets.RPI_AS7341_PKT_ID:
 			self.valid = 0
 		else:
 			# Get packet validity from data
@@ -109,7 +111,7 @@ class RPI_UART_Packet_AS7341:
 
 class RPI_UART_Packet_UNIX_TIME:
 	def __init__(self, unixTimeSec: int, unixTimezone: int):
-		self.packet_id = RPI_UNIX_TIME_PKT_ID
+		self.packet_id = UARTPackets.RPI_UNIX_TIME_PKT_ID
 		self.unixTimeSec = unixTimeSec
 		self.unixTimezone = unixTimezone
 
@@ -122,7 +124,7 @@ class RPI_UART_Packet_UNIX_TIME_Request:
 		self.packet_id = data[PACKET_ID]
 
 		# If the packet ID is not the UNIX_TIME_REQUEST packet
-		if self.packet_id is not RPI_UNIX_TIME_REQUEST_PKT_ID:
+		if self.packet_id is not UARTPackets.RPI_UNIX_TIME_REQUEST_PKT_ID:
 			self.valid = False
 		else:
 			# Get packet validity from data

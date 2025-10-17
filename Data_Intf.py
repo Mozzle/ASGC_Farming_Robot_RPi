@@ -16,15 +16,15 @@ def UART_LOOP():
 		#print ("Packet ID: " + str(pkt_id))
 	else:
 		return
-    
-	if pkt_id >= UART_Packets.RPI_UART_NUM_PKT_IDS:
+
+	if pkt_id >= len(UART_Packets.UARTPackets):
 		print("Invalid Packet ID: " + str(pkt_id))
 		return
 
 	# ---------------------------- GCODE PKT ID ----------------------------
-	if pkt_id == UART_Packets.RPI_GCODE_PKT_ID:
-		bytes_rec = port.read(UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.RPI_GCODE_PKT_ID])
-		if len(bytes_rec) == UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.RPI_GCODE_PKT_ID]:
+	if pkt_id == UART_Packets.UARTPackets.RPI_GCODE_PKT_ID:
+		bytes_rec = port.read(UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_GCODE_PKT_ID])
+		if len(bytes_rec) == UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_GCODE_PKT_ID]:
 			pkt = UART_Packets.RPI_UART_Packet_GCode(bytes_rec)
 
 			if pkt.valid == C_TRUE:
@@ -36,14 +36,14 @@ def UART_LOOP():
 				# Make and send the ACK packet
 				ack_pkt = UART_Packets.RPI_UART_Packet_ACK(C_TRUE)
 				port.write(ack_pkt.raw)
-		
+
 		else:
 			print("Error: Incomplete GCode Packet")
 
 	# ------------------------ AHT20 DATA PKT ID -------------------------
-	elif pkt_id == UART_Packets.RPI_AHT20_PKT_ID:
-		bytes_rec = port.read(UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.RPI_AHT20_PKT_ID])
-		if len(bytes_rec) == UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.RPI_AHT20_PKT_ID]:
+	elif pkt_id == UART_Packets.UARTPackets.RPI_AHT20_PKT_ID:
+		bytes_rec = port.read(UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_AHT20_PKT_ID])
+		if len(bytes_rec) == UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_AHT20_PKT_ID]:
 			pkt = UART_Packets.RPI_UART_Packet_AHT20(bytes_rec)
 
 			if pkt.valid == C_TRUE:
@@ -58,10 +58,10 @@ def UART_LOOP():
 			print("Error: Incomplete AHT20 Packet")
 
 	# -------------------------- SEN0169 PKT ID --------------------------
-	elif pkt_id == UART_Packets.RPI_SEN0169_PKT_ID:
-		bytes_rec = port.read(UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.RPI_SEN0169_PKT_ID])
+	elif pkt_id == UART_Packets.UARTPackets.RPI_SEN0169_PKT_ID:
+		bytes_rec = port.read(UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_SEN0169_PKT_ID])
 
-		if len(bytes_rec) == UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.RPI_SEN0169_PKT_ID]:
+		if len(bytes_rec) == UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_SEN0169_PKT_ID]:
 
 			pkt = UART_Packets.RPI_UART_Packet_SEN0169(bytes_rec)
 
@@ -77,9 +77,9 @@ def UART_LOOP():
 			print("Error: Incomplete SEN0169 Packet")
 
 	# -------------------------- SEN0244 PKT ID --------------------------
-	elif pkt_id == UART_Packets.RPI_SEN0244_PKT_ID:
-		bytes_rec = port.read(UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.RPI_SEN0244_PKT_ID])
-		if len(bytes_rec) == UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.RPI_SEN0244_PKT_ID]:
+	elif pkt_id == UART_Packets.UARTPackets.RPI_SEN0244_PKT_ID:
+		bytes_rec = port.read(UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_SEN0244_PKT_ID])
+		if len(bytes_rec) == UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_SEN0244_PKT_ID]:
 			pkt = UART_Packets.RPI_UART_Packet_SEN0244(bytes_rec)
 
 			if pkt.valid == C_TRUE:
@@ -94,15 +94,15 @@ def UART_LOOP():
 			print("Error: Incomplete SEN0244 Packet")
 
 	# -------------------------- AS7341 PKT ID ----------------------------
-	elif pkt_id == UART_Packets.RPI_AS7341_PKT_ID:
-		bytes_rec = port.read(UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.RPI_AS7341_PKT_ID])
-		if len(bytes_rec) == UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.RPI_AS7341_PKT_ID]:
+	elif pkt_id == UART_Packets.UARTPackets.RPI_AS7341_PKT_ID:
+		bytes_rec = port.read(UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_AS7341_PKT_ID])
+		if len(bytes_rec) == UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_AS7341_PKT_ID]:
 			pkt = UART_Packets.RPI_UART_Packet_AS7341(bytes_rec)
 
 			if pkt.valid == C_TRUE:
 				print("AS7341 CH0: " + str(pkt.channel_0) + " CH1: " + str(pkt.channel_1) + " CH2: " + str(pkt.channel_2) + " CH3: " + str(pkt.channel_3) + " CH4: " + str(pkt.channel_4) + " CH5: " + str(pkt.channel_5) + " CH6: " + str(pkt.channel_6) + " CH7: " + str(pkt.channel_7) + " CH8: " + str(pkt.channel_8) + " CH9: " + str(pkt.channel_9) + " CH10: " + str(pkt.channel_10))
 				# DO SOMETHING WITH THE AS7341 DATA HERE
-				
+
 				# Make and send the ACK packet
 				ack_pkt = UART_Packets.RPI_UART_Packet_ACK(C_TRUE)
 				port.write(ack_pkt.raw)
@@ -110,7 +110,7 @@ def UART_LOOP():
 			print("Error: Incomplete AS7341 Packet")
 
 	# --------------------- UNIX TIME REQUEST PKT ID ---------------------
-	elif pkt_id == UART_Packets.RPI_UNIX_TIME_REQUEST_PKT_ID:
+	elif pkt_id == UART_Packets.UARTPackets.RPI_UNIX_TIME_REQUEST_PKT_ID:
 		# Get the current UNIX time
 		unix_time = int(time.time())
 		timezone = int(datetime.now().astimezone().strftime("%z")) / 100  # in hours
@@ -122,7 +122,7 @@ def UART_LOOP():
 
 	else:
 		print("Unhandled Packet ID: " + str(pkt_id))
-	
+
 
 ''' ------------------------------------------------------------------------
    Program Entry Point
