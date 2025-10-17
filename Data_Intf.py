@@ -4,124 +4,146 @@ import UART_Packets
 from datetime import datetime
 import time
 from subprocess import call
+import re
 
 C_FALSE = 0
 C_TRUE = 1
 
 def UART_LOOP():
-	global port
-	if port.in_waiting > 0:
-		pkt_id = port.read(1)
-		pkt_id = int.from_bytes(pkt_id, "big")
-		#print ("Packet ID: " + str(pkt_id))
-	else:
-		return
+   global port
+   if port.in_waiting > 0:
+      pkt_id = port.read(1)
+      pkt_id = int.from_bytes(pkt_id, "big")
+      #print ("Packet ID: " + str(pkt_id))
+   else:
+      return
 
-	if pkt_id >= len(UART_Packets.UARTPackets):
-		print("Invalid Packet ID: " + str(pkt_id))
-		return
+   if pkt_id >= len(UART_Packets.UARTPackets):
+      print("Invalid Packet ID: " + str(pkt_id))
+      return
 
-	# ---------------------------- GCODE PKT ID ----------------------------
-	if pkt_id == UART_Packets.UARTPackets.RPI_GCODE_PKT_ID:
-		bytes_rec = port.read(UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_GCODE_PKT_ID])
-		if len(bytes_rec) == UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_GCODE_PKT_ID]:
-			pkt = UART_Packets.RPI_UART_Packet_GCode(bytes_rec)
+   # ---------------------------- GCODE PKT ID ----------------------------
+   if pkt_id == UART_Packets.UARTPackets.RPI_GCODE_PKT_ID:
+      bytes_rec = port.read(UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_GCODE_PKT_ID])
+      if len(bytes_rec) == UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_GCODE_PKT_ID]:
+         pkt = UART_Packets.RPI_UART_Packet_GCode(bytes_rec)
 
-			if pkt.valid == C_TRUE:
-				gcode_full_str = pkt.gcode_str
+         if pkt.valid == C_TRUE:
+            gcode_full_str = pkt.gcode_str
 
-				# Send the gcode to the SKR MINI E3 via the terminal
-				call(["echo", gcode_full_str, ">>", "/tmp/printer/"])
+            # Send the gcode to the SKR MINI E3 via the terminal
+            call(["echo", gcode_full_str, ">>", "/tmp/printer/"])
 
-				# Make and send the ACK packet
-				ack_pkt = UART_Packets.RPI_UART_Packet_ACK(C_TRUE)
-				port.write(ack_pkt.raw)
+            # Make and send the ACK packet
+            ack_pkt = UART_Packets.RPI_UART_Packet_ACK(C_TRUE)
+            port.write(ack_pkt.raw)
 
-		else:
-			print("Error: Incomplete GCode Packet")
+      else:
+         print("Error: Incomplete GCode Packet")
 
-	# ------------------------ AHT20 DATA PKT ID -------------------------
-	elif pkt_id == UART_Packets.UARTPackets.RPI_AHT20_PKT_ID:
-		bytes_rec = port.read(UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_AHT20_PKT_ID])
-		if len(bytes_rec) == UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_AHT20_PKT_ID]:
-			pkt = UART_Packets.RPI_UART_Packet_AHT20(bytes_rec)
+   # ------------------------ AHT20 DATA PKT ID -------------------------
+   elif pkt_id == UART_Packets.UARTPackets.RPI_AHT20_PKT_ID:
+      bytes_rec = port.read(UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_AHT20_PKT_ID])
+      if len(bytes_rec) == UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_AHT20_PKT_ID]:
+         pkt = UART_Packets.RPI_UART_Packet_AHT20(bytes_rec)
 
-			if pkt.valid == C_TRUE:
-				print("AHT20 Temp: " + str(pkt.temperature) + " C  Humidity: " + str(pkt.humidity * 100) + " %")
+         if pkt.valid == C_TRUE:
+            print("AHT20 Temp: " + str(pkt.temperature) + " C  Humidity: " + str(pkt.humidity * 100) + " %")
 
-				# DO SOMETHING WITH THE AHT20 DATA HERE
+            # DO SOMETHING WITH THE AHT20 DATA HERE
 
-				# Make and send the ACK packet
-				ack_pkt = UART_Packets.RPI_UART_Packet_ACK(C_TRUE)
-				port.write(ack_pkt.raw)
-		else: 
-			print("Error: Incomplete AHT20 Packet")
+            # Make and send the ACK packet
+            ack_pkt = UART_Packets.RPI_UART_Packet_ACK(C_TRUE)
+            port.write(ack_pkt.raw)
+      else: 
+         print("Error: Incomplete AHT20 Packet")
 
-	# -------------------------- SEN0169 PKT ID --------------------------
-	elif pkt_id == UART_Packets.UARTPackets.RPI_SEN0169_PKT_ID:
-		bytes_rec = port.read(UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_SEN0169_PKT_ID])
+   # -------------------------- SEN0169 PKT ID --------------------------
+   elif pkt_id == UART_Packets.UARTPackets.RPI_SEN0169_PKT_ID:
+      bytes_rec = port.read(UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_SEN0169_PKT_ID])
 
-		if len(bytes_rec) == UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_SEN0169_PKT_ID]:
+      if len(bytes_rec) == UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_SEN0169_PKT_ID]:
 
-			pkt = UART_Packets.RPI_UART_Packet_SEN0169(bytes_rec)
+         pkt = UART_Packets.RPI_UART_Packet_SEN0169(bytes_rec)
 
-			if pkt.valid == C_TRUE:
-				print("SEN0169 pH: " + str(pkt.pH))
+         if pkt.valid == C_TRUE:
+            print("SEN0169 pH: " + str(pkt.pH))
 
-				# DO SOMETHING WITH THE SEN0169 DATA HERE
+            # DO SOMETHING WITH THE SEN0169 DATA HERE
 
-				# Make and send the ACK packet
-				ack_pkt = UART_Packets.RPI_UART_Packet_ACK(C_TRUE)
-				port.write(ack_pkt.raw)
-		else:
-			print("Error: Incomplete SEN0169 Packet")
+            # Make and send the ACK packet
+            ack_pkt = UART_Packets.RPI_UART_Packet_ACK(C_TRUE)
+            port.write(ack_pkt.raw)
+      else:
+         print("Error: Incomplete SEN0169 Packet")
 
-	# -------------------------- SEN0244 PKT ID --------------------------
-	elif pkt_id == UART_Packets.UARTPackets.RPI_SEN0244_PKT_ID:
-		bytes_rec = port.read(UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_SEN0244_PKT_ID])
-		if len(bytes_rec) == UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_SEN0244_PKT_ID]:
-			pkt = UART_Packets.RPI_UART_Packet_SEN0244(bytes_rec)
+   # -------------------------- SEN0244 PKT ID --------------------------
+   elif pkt_id == UART_Packets.UARTPackets.RPI_SEN0244_PKT_ID:
+      bytes_rec = port.read(UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_SEN0244_PKT_ID])
+      if len(bytes_rec) == UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_SEN0244_PKT_ID]:
+         pkt = UART_Packets.RPI_UART_Packet_SEN0244(bytes_rec)
 
-			if pkt.valid == C_TRUE:
-				print("SEN0244 TDS: " + str(pkt.tds) + " ppm")
+         if pkt.valid == C_TRUE:
+            print("SEN0244 TDS: " + str(pkt.tds) + " ppm")
 
-				# DO SOMETHING WITH THE SEN0244 DATA HERE
+            # DO SOMETHING WITH THE SEN0244 DATA HERE
 
-				# Make and send the ACK packet
-				ack_pkt = UART_Packets.RPI_UART_Packet_ACK(C_TRUE)
-				port.write(ack_pkt.raw)
-		else:
-			print("Error: Incomplete SEN0244 Packet")
+            # Make and send the ACK packet
+            ack_pkt = UART_Packets.RPI_UART_Packet_ACK(C_TRUE)
+            port.write(ack_pkt.raw)
+      else:
+         print("Error: Incomplete SEN0244 Packet")
 
-	# -------------------------- AS7341 PKT ID ----------------------------
-	elif pkt_id == UART_Packets.UARTPackets.RPI_AS7341_PKT_ID:
-		bytes_rec = port.read(UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_AS7341_PKT_ID])
-		if len(bytes_rec) == UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_AS7341_PKT_ID]:
-			pkt = UART_Packets.RPI_UART_Packet_AS7341(bytes_rec)
+   # -------------------------- AS7341 PKT ID ----------------------------
+   elif pkt_id == UART_Packets.UARTPackets.RPI_AS7341_PKT_ID:
+      bytes_rec = port.read(UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_AS7341_PKT_ID])
+      if len(bytes_rec) == UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.UARTPackets.RPI_AS7341_PKT_ID]:
+         pkt = UART_Packets.RPI_UART_Packet_AS7341(bytes_rec)
 
-			if pkt.valid == C_TRUE:
-				print("AS7341 CH0: " + str(pkt.channel_0) + " CH1: " + str(pkt.channel_1) + " CH2: " + str(pkt.channel_2) + " CH3: " + str(pkt.channel_3) + " CH4: " + str(pkt.channel_4) + " CH5: " + str(pkt.channel_5) + " CH6: " + str(pkt.channel_6) + " CH7: " + str(pkt.channel_7) + " CH8: " + str(pkt.channel_8) + " CH9: " + str(pkt.channel_9) + " CH10: " + str(pkt.channel_10))
-				# DO SOMETHING WITH THE AS7341 DATA HERE
+         if pkt.valid == C_TRUE:
+            print("AS7341 CH0: " + str(pkt.channel_0) + " CH1: " + str(pkt.channel_1) + " CH2: " + str(pkt.channel_2) + " CH3: " + str(pkt.channel_3) + " CH4: " + str(pkt.channel_4) + " CH5: " + str(pkt.channel_5) + " CH6: " + str(pkt.channel_6) + " CH7: " + str(pkt.channel_7) + " CH8: " + str(pkt.channel_8) + " CH9: " + str(pkt.channel_9) + " CH10: " + str(pkt.channel_10))
+            # DO SOMETHING WITH THE AS7341 DATA HERE
 
-				# Make and send the ACK packet
-				ack_pkt = UART_Packets.RPI_UART_Packet_ACK(C_TRUE)
-				port.write(ack_pkt.raw)
-		else:
-			print("Error: Incomplete AS7341 Packet")
+            # Make and send the ACK packet
+            ack_pkt = UART_Packets.RPI_UART_Packet_ACK(C_TRUE)
+            port.write(ack_pkt.raw)
+      else:
+         print("Error: Incomplete AS7341 Packet")
 
-	# --------------------- UNIX TIME REQUEST PKT ID ---------------------
-	elif pkt_id == UART_Packets.UARTPackets.RPI_UNIX_TIME_REQUEST_PKT_ID:
-		# Get the current UNIX time
-		unix_time = int(time.time())
-		timezone = int(datetime.now().astimezone().strftime("%z")) / 100  # in hours
-		print("Sending Unix Time: " + str(unix_time) + ", TZ: " + str(timezone))
+   # --------------------- UNIX TIME REQUEST PKT ID ---------------------
+   elif pkt_id == UART_Packets.UARTPackets.RPI_UNIX_TIME_REQUEST_PKT_ID:
+      # Get the current UNIX time
+      unix_time = int(time.time())
+      timezone = int(datetime.now().astimezone().strftime("%z")) / 100  # in hours
+      print("Sending Unix Time: " + str(unix_time) + ", TZ: " + str(timezone))
 
-		# Send the UNIX time packet back to the RPi
-		unix_time_pkt = UART_Packets.RPI_UART_Packet_UNIX_TIME(unix_time, timezone)
-		port.write(unix_time_pkt.raw)
+      # Send the UNIX time packet back to the RPi
+      unix_time_pkt = UART_Packets.RPI_UART_Packet_UNIX_TIME(unix_time, timezone)
+      port.write(unix_time_pkt.raw)
 
-	else:
-		print("Unhandled Packet ID: " + str(pkt_id))
+   # --------------------- GET AXES REQUEST PKT ID -----------------------
+   elif pkt_id == UART_Packets.UARTPackets.RPI_GET_AXES_POS_PKT_ID:
+      # Send M114
+      call(["echo", "M114", ">>", "/tmp/printer"])
+
+      # Read response
+      serial_log_path = "~/.octoprint/logs/serial.log"
+
+      with open(serial_log_path, 'r') as file:
+         log_lines = file.readlines()
+
+      # only search the last 100 lines
+      x, y, z, e = None, None, None, None
+      p = re.compile(r'Recv: X:(\d+.\d+) Y:(\d+.\d+) Z:(\d+.\d+) E:(\d+.\d+)')
+      for line in list(reversed(log_lines))[:100]:
+         if s := p.search(line):
+            x = float(s.group(0))
+            y = float(s.group(1))
+            z = float(s.group(2))
+            e = float(s.group(3))
+
+   else:
+      print("Unhandled Packet ID: " + str(pkt_id))
 
 
 ''' ------------------------------------------------------------------------
