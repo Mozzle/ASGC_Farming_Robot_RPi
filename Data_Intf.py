@@ -1,199 +1,135 @@
+import serial
+import UART_Packets
+
+from datetime import datetime
 import time
-import pigpio
-import I2C_Packets
 from subprocess import call
 
-SDA_PIN=18
-SCL_PIN=19
+C_FALSE = 0
+C_TRUE = 1
 
-I2C_ADDR=9
+def UART_LOOP():
+	global port
+	if port.in_waiting > 0:
+		pkt_id = port.read(1)
+		pkt_id = int.from_bytes(pkt_id, "big")
+		#print ("Packet ID: " + str(pkt_id))
+	else:
+		return
+    
+	if pkt_id >= UART_Packets.RPI_UART_NUM_PKT_IDS:
+		print("Invalid Packet ID: " + str(pkt_id))
+		return
 
-C_FALSE=0
-C_TRUE=1
+	# ---------------------------- GCODE PKT ID ----------------------------
+	if pkt_id == UART_Packets.RPI_GCODE_PKT_ID:
+		bytes_rec = port.read(UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.RPI_GCODE_PKT_ID])
+		if len(bytes_rec) == UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.RPI_GCODE_PKT_ID]:
+			pkt = UART_Packets.RPI_UART_Packet_GCode(bytes_rec)
 
-pkt_rec_count = 0
-pkt_success_count = 0
-last_rec_pkt_id = -1
-gcode_full_str = ""
+			if pkt.valid == C_TRUE:
+				gcode_full_str = pkt.gcode_str
 
-''' ------------------------------------------------------------------------
-i2c_loop
+				# Send the gcode to the SKR MINI E3 via the terminal
+				call(["echo", gcode_full_str, ">>", "/tmp/printer/"])
 
-   The main callback loop that is called whenever BSC (Broadcom Serial
-   Controller) activity is detected. Handles receipt, processing, and
-   responding to I2C packets from the Nucleo Board.
------------------------------------------------------------------------- '''
-def i2c_loop(id, tick):
-   global pkt_rec_count
-   global pkt_success_count
-   global last_rec_pkt_id
-   global gcode_full_str
+				# Make and send the ACK packet
+				ack_pkt = UART_Packets.RPI_UART_Packet_ACK(C_TRUE)
+				port.write(ack_pkt.raw)
+		
+		else:
+			print("Error: Incomplete GCode Packet")
 
-   status, bytes_rec, data = pi.bsc_i2c(I2C_ADDR) #status, num bytes, data
+	# ------------------------ AHT20 DATA PKT ID -------------------------
+	elif pkt_id == UART_Packets.RPI_AHT20_PKT_ID:
+		bytes_rec = port.read(UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.RPI_AHT20_PKT_ID])
+		if len(bytes_rec) == UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.RPI_AHT20_PKT_ID]:
+			pkt = UART_Packets.RPI_UART_Packet_AHT20(bytes_rec)
 
-   # If we received data
-   if bytes_rec:
-      #print(data[:-1])
-      pkt_rec_count += 1
+			if pkt.valid == C_TRUE:
+				print("AHT20 Temp: " + str(pkt.temperature) + " C  Humidity: " + str(pkt.humidity * 100) + " %")
 
-      if data[I2C_Packets.PACKET_ID] >= I2C_Packets.I2CPackets.RPI_I2C_NUM_PKT_IDS:
-         ack_pkt = I2C_Packets.RPI_I2C_Packet_ACK(C_FALSE)
-         print("ERROR: Invalid packet ID received!")
-         print("SENDING NACK PACKET")
-         s, b, d = pi.bsc_i2c(I2C_ADDR, ack_pkt.raw)
-         return
+				# DO SOMETHING WITH THE AHT20 DATA HERE
 
+				# Make and send the ACK packet
+				ack_pkt = UART_Packets.RPI_UART_Packet_ACK(C_TRUE)
+				port.write(ack_pkt.raw)
+		else: 
+			print("Error: Incomplete AHT20 Packet")
 
-      # If the received data length does not match the expected packet size
-      if bytes_rec is not I2C_Packets.RPI_PACKET_MAX_LENGTHS[data[I2C_Packets.PACKET_ID]]:
-         # Error of some kind
-         print("ERROR: Packet length mismatch! Len:" + str(bytes_rec))
-         ack_pkt = I2C_Packets.RPI_I2C_Packet_ACK(C_FALSE)
-         print("SENDING NACK PACKET")
-         s, b, d = pi.bsc_i2c(I2C_ADDR, ack_pkt.raw)
-         return
+	# -------------------------- SEN0169 PKT ID --------------------------
+	elif pkt_id == UART_Packets.RPI_SEN0169_PKT_ID:
+		bytes_rec = port.read(UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.RPI_SEN0169_PKT_ID])
 
+		if len(bytes_rec) == UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.RPI_SEN0169_PKT_ID]:
 
-      # Match the pkt_id
-      # -------------------------- ERROR PKT ID ----------------------------
-      if data[I2C_Packets.PACKET_ID] == I2C_Packets.I2CPackets.RPI_ERR_PKT_ID:
-         print("Yeah!")
+			pkt = UART_Packets.RPI_UART_Packet_SEN0169(bytes_rec)
 
-      # -------------------------- GCODE 0 PKT ID ----------------------------
-      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.I2CPackets.RPI_GCODE_0_PKT_ID and bytes_rec == I2C_Packets.RPI_PACKET_MAX_LENGTHS[I2C_Packets.I2CPackets.RPI_GCODE_0_PKT_ID]:
-         # Parse the data into the packet struct
-         pkt = I2C_Packets.RPI_I2C_Packet_GCode_0(data)
+			if pkt.valid == C_TRUE:
+				print("SEN0169 pH: " + str(pkt.pH))
 
-         # If packet is valid
-         if pkt.valid == C_TRUE:
-            # Send the gcode to the SKR MINI E3 via the terminal
-            gcode_full_str = pkt.gcode_str
+				# DO SOMETHING WITH THE SEN0169 DATA HERE
 
-            # Make and send the ACK packet
-            ack_pkt = I2C_Packets.RPI_I2C_Packet_ACK(C_TRUE)
-            s, b, d = pi.bsc_i2c(I2C_ADDR, ack_pkt.raw)
-            # Set last received pkt ID, to know to expect a GCode 1 packet next
-            last_rec_pkt_id = I2C_Packets.I2CPackets.RPI_GCODE_0_PKT_ID
+				# Make and send the ACK packet
+				ack_pkt = UART_Packets.RPI_UART_Packet_ACK(C_TRUE)
+				port.write(ack_pkt.raw)
+		else:
+			print("Error: Incomplete SEN0169 Packet")
 
-      # -------------------------- GCODE 1 PKT ID ----------------------------
-      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.I2CPackets.RPI_GCODE_1_PKT_ID and bytes_rec == I2C_Packets.RPI_PACKET_MAX_LENGTHS[I2C_Packets.I2CPackets.RPI_GCODE_1_PKT_ID]:
-         # Parse the data into the packet struct
+	# -------------------------- SEN0244 PKT ID --------------------------
+	elif pkt_id == UART_Packets.RPI_SEN0244_PKT_ID:
+		bytes_rec = port.read(UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.RPI_SEN0244_PKT_ID])
+		if len(bytes_rec) == UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.RPI_SEN0244_PKT_ID]:
+			pkt = UART_Packets.RPI_UART_Packet_SEN0244(bytes_rec)
 
-         if last_rec_pkt_id == I2C_Packets.I2CPackets.RPI_GCODE_0_PKT_ID:
-            pkt = I2C_Packets.RPI_I2C_Packet_GCode_1(data)
-            gcode_full_str += pkt.gcode_str
+			if pkt.valid == C_TRUE:
+				print("SEN0244 TDS: " + str(pkt.tds) + " ppm")
 
-            # Make and send the ACK packet
-            ack_pkt = I2C_Packets.RPI_I2C_Packet_ACK(C_TRUE)
-            s, b, d = pi.bsc_i2c(I2C_ADDR, ack_pkt.raw)
-            # Set last received pkt ID, to know to expect a GCode 1 packet next
-            last_rec_pkt_id = I2C_Packets.I2CPackets.RPI_GCODE_1_PKT_ID
+				# DO SOMETHING WITH THE SEN0244 DATA HERE
 
-      # -------------------------- GCODE 2 PKT ID ----------------------------
-      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.I2CPackets.RPI_GCODE_2_PKT_ID and bytes_rec == I2C_Packets.RPI_PACKET_MAX_LENGTHS[I2C_Packets.I2CPackets.RPI_GCODE_2_PKT_ID]:
-         # Parse the data into the packet struct
+				# Make and send the ACK packet
+				ack_pkt = UART_Packets.RPI_UART_Packet_ACK(C_TRUE)
+				port.write(ack_pkt.raw)
+		else:
+			print("Error: Incomplete SEN0244 Packet")
 
-         if last_rec_pkt_id == I2C_Packets.I2CPackets.RPI_GCODE_1_PKT_ID:
-            pkt = I2C_Packets.RPI_I2C_Packet_GCode_2(data)
-            gcode_full_str += pkt.gcode_str
+	# -------------------------- AS7341 PKT ID ----------------------------
+	elif pkt_id == UART_Packets.RPI_AS7341_PKT_ID:
+		bytes_rec = port.read(UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.RPI_AS7341_PKT_ID])
+		if len(bytes_rec) == UART_Packets.RPI_PACKET_LENGTHS[UART_Packets.RPI_AS7341_PKT_ID]:
+			pkt = UART_Packets.RPI_UART_Packet_AS7341(bytes_rec)
 
-            # Make and send the ACK packet
-            ack_pkt = I2C_Packets.RPI_I2C_Packet_ACK(C_TRUE)
-            s, b, d = pi.bsc_i2c(I2C_ADDR, ack_pkt.raw)
-            # Set last received pkt ID, to know to expect a GCode 1 packet next
-            last_rec_pkt_id = I2C_Packets.I2CPackets.RPI_GCODE_2_PKT_ID
+			if pkt.valid == C_TRUE:
+				print("AS7341 CH0: " + str(pkt.channel_0) + " CH1: " + str(pkt.channel_1) + " CH2: " + str(pkt.channel_2) + " CH3: " + str(pkt.channel_3) + " CH4: " + str(pkt.channel_4) + " CH5: " + str(pkt.channel_5) + " CH6: " + str(pkt.channel_6) + " CH7: " + str(pkt.channel_7) + " CH8: " + str(pkt.channel_8) + " CH9: " + str(pkt.channel_9) + " CH10: " + str(pkt.channel_10))
+				# DO SOMETHING WITH THE AS7341 DATA HERE
+				
+				# Make and send the ACK packet
+				ack_pkt = UART_Packets.RPI_UART_Packet_ACK(C_TRUE)
+				port.write(ack_pkt.raw)
+		else:
+			print("Error: Incomplete AS7341 Packet")
 
-      # -------------------------- GCODE 3 PKT ID ----------------------------
-      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.I2CPackets.RPI_GCODE_3_PKT_ID and bytes_rec == I2C_Packets.RPI_PACKET_MAX_LENGTHS[I2C_Packets.I2CPackets.RPI_GCODE_3_PKT_ID]:
-         # Parse the data into the packet struct
+	# --------------------- UNIX TIME REQUEST PKT ID ---------------------
+	elif pkt_id == UART_Packets.RPI_UNIX_TIME_REQUEST_PKT_ID:
+		# Get the current UNIX time
+		unix_time = int(time.time())
+		timezone = int(datetime.now().astimezone().strftime("%z")) / 100  # in hours
+		print("Sending Unix Time: " + str(unix_time) + ", TZ: " + str(timezone))
 
-         if last_rec_pkt_id == I2C_Packets.I2CPackets.RPI_GCODE_2_PKT_ID:
-            pkt = I2C_Packets.RPI_I2C_Packet_GCode_3(data)
-            gcode_full_str += pkt.gcode_str
+		# Send the UNIX time packet back to the RPi
+		unix_time_pkt = UART_Packets.RPI_UART_Packet_UNIX_TIME(unix_time, timezone)
+		port.write(unix_time_pkt.raw)
 
-            # Make and send the ACK packet
-            ack_pkt = I2C_Packets.RPI_I2C_Packet_ACK(C_TRUE)
-            s, b, d = pi.bsc_i2c(I2C_ADDR, ack_pkt.raw)
-            # Set last received pkt ID, to know to expect a GCode 1 packet next
-            last_rec_pkt_id = I2C_Packets.I2CPackets.RPI_GCODE_3_PKT_ID
-
-      # -------------------------- GCODE 4 PKT ID ----------------------------
-      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.I2CPackets.RPI_GCODE_4_PKT_ID and bytes_rec == I2C_Packets.RPI_PACKET_MAX_LENGTHS[I2C_Packets.I2CPackets.RPI_GCODE_4_PKT_ID]:
-         # Parse the data into the packet struct
-
-         if last_rec_pkt_id == I2C_Packets.I2CPackets.RPI_GCODE_3_PKT_ID:
-            pkt = I2C_Packets.RPI_I2C_Packet_GCode_4(data)
-            pkt_success_count += 1
-            gcode_full_str += pkt.gcode_str
-            # Send the gcode to the SKR MINI E3 via the terminal
-            call(["echo", gcode_full_str, ">>", "/tmp/printer/"])
-
-            # Make and send the ACK packet
-            ack_pkt = I2C_Packets.RPI_I2C_Packet_ACK(C_TRUE)
-            s, b, d = pi.bsc_i2c(I2C_ADDR, ack_pkt.raw)
-            # Set last received pkt ID, to know to expect a GCode 1 packet next
-            last_rec_pkt_id = I2C_Packets.I2CPackets.RPI_GCODE_4_PKT_ID
-
-            print("[" + str(pkt_success_count) + "/" + str((pkt_rec_count/5)) + "]")
-
-
-      # ------------------------ AHT20 DATA PKT ID -------------------------
-      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.I2CPackets.RPI_AHT20_PKT_ID:
-         print("Else!")
-
-      # ------------------------ WATER DATA PKT ID -------------------------
-      # elif data[I2C_Packets.PACKET_ID] == I2C_Packets.I2CPackets.RPI_WATER_DATA_PKT_ID:
-      #    pass
-
-      # ----------------------- BUTTONS DATA PKT ID ------------------------
-      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.I2CPackets.RPI_BUTTONS_PKT_ID:
-         pass
-
-      # ---------------------- NET POT STATUS PKT ID -----------------------
-      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.I2CPackets.RPI_NET_POT_STATUS_PKT_ID:
-         pass
-
-      # ------------------ GET AXES DATA REQUEST PKT ID --------------------
-      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.I2CPackets.RPI_GET_AXES_POS_PKT_ID:
-         pass
-
-      elif data[I2C_Packets.PACKET_ID] == I2C_Packets.I2CPackets.RPI_I2C_UNIX_TIME:
-         pkt = I2C_Packets.RPI_I2C_PACKET_UNIX_TIME()
-
-         s, b, d = pi.bsc_i2c(I2C_ADDR, pkt.raw)
-
-         print(f"Sent UNIX Time Packet. Current time : {pkt.now}")
-
-      # -------------------------- DEFAULT CASE ----------------------------
-      else:
-         print("okay")
-
-
+	else:
+		print("Unhandled Packet ID: " + str(pkt_id))
+	
 
 ''' ------------------------------------------------------------------------
    Program Entry Point
    ------------------------------------------------------------------------ '''
-# Start the interface
-pi = pigpio.pi()
 
-if not pi.connected:
-   exit()
+port = serial.Serial("/dev/ttyAMA0", baudrate=115200, timeout=0.5)
+print("Opening Serial Interface with Nucleo Microcontroller...")
 
-# Add pull-ups in case external pull-ups haven't been added
-pi.set_pull_up_down(SDA_PIN, pigpio.PUD_UP)
-pi.set_pull_up_down(SCL_PIN, pigpio.PUD_UP)
-
-print("Starting I2C Data Interface...")
-
-# Respond to BSC slave activity, registering the i2c_loop as callback function
-e = pi.event_callback(pigpio.EVENT_BSC, i2c_loop)
-pi.bsc_i2c(I2C_ADDR) # Configure BSC as I2C slave
-while pi.connected:
-   time.sleep(0.1)
-
-# If the interface exits, gracefully shut down
-e.cancel()
-pi.bsc_i2c(0) # Disable BSC peripheral
-pi.stop()
-print("Exiting")
-
+while True:
+    UART_LOOP()
