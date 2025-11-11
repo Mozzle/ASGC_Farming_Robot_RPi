@@ -195,4 +195,4 @@ port = serial.Serial("/dev/ttyAMA0", baudrate=115200, timeout=0.5)
 print("Opening Serial Interface with Nucleo Microcontroller...")
 
 while True:
-    UART_LOOP()
+   UART_LOOP()
