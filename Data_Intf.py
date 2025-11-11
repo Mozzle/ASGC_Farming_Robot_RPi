@@ -5,6 +5,11 @@ from datetime import datetime
 import time
 from subprocess import call
 import re
+import os
+
+from historical_logger import log_packet_csv
+
+os.makedirs('historical-data/', exist_ok=True)
 
 C_FALSE = 0
 C_TRUE = 1
@@ -37,6 +42,13 @@ def UART_LOOP():
             # Make and send the ACK packet
             ack_pkt = UART_Packets.RPI_UART_Packet_ACK(C_TRUE)
             port.write(ack_pkt.raw)
+            
+            # Log GCODE to CSV
+            try:
+               log_packet_csv('GCODE', ['gcode'], [gcode_full_str])
+            except Exception:
+               # don't let logging break serial handling
+               pass
 
       else:
          print("Error: Incomplete GCode Packet")
@@ -51,11 +63,16 @@ def UART_LOOP():
             print("AHT20 Temp: " + str(pkt.temperature) + " C  Humidity: " + str(pkt.humidity * 100) + " %")
 
             # DO SOMETHING WITH THE AHT20 DATA HERE
+            # Log AHT20 readings
+            try:
+               log_packet_csv('AHT20', ['temperature_C', 'humidity_percent'], [pkt.temperature, pkt.humidity * 100])
+            except Exception:
+               pass
 
             # Make and send the ACK packet
             ack_pkt = UART_Packets.RPI_UART_Packet_ACK(C_TRUE)
             port.write(ack_pkt.raw)
-      else: 
+      else:
          print("Error: Incomplete AHT20 Packet")
 
    # -------------------------- SEN0169 PKT ID --------------------------
@@ -70,6 +87,11 @@ def UART_LOOP():
             print("SEN0169 pH: " + str(pkt.pH))
 
             # DO SOMETHING WITH THE SEN0169 DATA HERE
+            # Log pH
+            try:
+               log_packet_csv('SEN0169', ['pH'], [pkt.pH])
+            except Exception:
+               pass
 
             # Make and send the ACK packet
             ack_pkt = UART_Packets.RPI_UART_Packet_ACK(C_TRUE)
@@ -87,6 +109,11 @@ def UART_LOOP():
             print("SEN0244 TDS: " + str(pkt.tds) + " ppm")
 
             # DO SOMETHING WITH THE SEN0244 DATA HERE
+            # Log TDS
+            try:
+               log_packet_csv('SEN0244', ['TDS_ppm'], [pkt.tds])
+            except Exception:
+               pass
 
             # Make and send the ACK packet
             ack_pkt = UART_Packets.RPI_UART_Packet_ACK(C_TRUE)
@@ -103,6 +130,13 @@ def UART_LOOP():
          if pkt.valid == C_TRUE:
             print("AS7341 CH0: " + str(pkt.channel_0) + " CH1: " + str(pkt.channel_1) + " CH2: " + str(pkt.channel_2) + " CH3: " + str(pkt.channel_3) + " CH4: " + str(pkt.channel_4) + " CH5: " + str(pkt.channel_5) + " CH6: " + str(pkt.channel_6) + " CH7: " + str(pkt.channel_7) + " CH8: " + str(pkt.channel_8) + " CH9: " + str(pkt.channel_9) + " CH10: " + str(pkt.channel_10))
             # DO SOMETHING WITH THE AS7341 DATA HERE
+            # Log AS7341 channels
+            try:
+               headers = [f'channel_{i}' for i in range(0, 11)]
+               values = [pkt.channel_0, pkt.channel_1, pkt.channel_2, pkt.channel_3, pkt.channel_4, pkt.channel_5, pkt.channel_6, pkt.channel_7, pkt.channel_8, pkt.channel_9, pkt.channel_10]
+               log_packet_csv('AS7341', headers, values)
+            except Exception:
+               pass
 
             # Make and send the ACK packet
             ack_pkt = UART_Packets.RPI_UART_Packet_ACK(C_TRUE)
@@ -120,6 +154,11 @@ def UART_LOOP():
       # Send the UNIX time packet back to the RPi
       unix_time_pkt = UART_Packets.RPI_UART_Packet_UNIX_TIME(unix_time, timezone)
       port.write(unix_time_pkt.raw)
+      # Log the time request/response
+      try:
+         log_packet_csv('UNIX_TIME_REQUEST', ['sent_unix_time', 'timezone_hours'], [unix_time, timezone])
+      except Exception:
+         pass
 
    # --------------------- GET AXES REQUEST PKT ID -----------------------
    elif pkt_id == UART_Packets.UARTPackets.RPI_GET_AXES_POS_PKT_ID:
@@ -141,6 +180,8 @@ def UART_LOOP():
             y = float(s.group(1))
             z = float(s.group(2))
             e = float(s.group(3))
+
+         # Pretty sure this should do something else
 
    else:
       print("Unhandled Packet ID: " + str(pkt_id))
