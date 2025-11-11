@@ -8,10 +8,21 @@ app = flask.Flask(__name__, template_folder='templates/')
 
 @app.route('/')
 def index():
-    printer_info: octoprint.PrinterInfo = octoprint.get_current_state()
-    camera.take_photo()
+    # Get printer info if available; fail gracefully if OctoPrint is unreachable
+    try:
+        printer_info: octoprint.PrinterInfo = octoprint.get_current_state()
+    except Exception as e:
+        # Could log the exception here; for now pass None to the template
+        printer_info = None
 
-    return flask.render_template('index.j2')
+    # Update camera image (non-blocking concerns should be handled elsewhere)
+    try:
+        camera.take_photo()
+    except Exception:
+        # If camera fails, continue and let template show last available image
+        pass
+
+    return flask.render_template('index.j2', printer=printer_info)
 
 
 @app.route('/emergency_stop', methods=['POST'])

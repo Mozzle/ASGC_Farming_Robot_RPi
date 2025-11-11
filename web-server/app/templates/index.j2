@@ -9,12 +9,12 @@
 <body>
     <div class="container">
         <h1>Farming Robot Control Panel</h1>
-        
+
         <div class="camera-section">
             <h2>Camera Feed</h2>
-            <img src="camera.png" alt="photo from camera" class="camera-feed">
+            <img src="{{ url_for('static', filename='camera.png') }}" alt="photo from camera" class="camera-feed">
         </div>
-        
+
         <div class="controls-section">
             <h2>Emergency Controls</h2>
             <button id="emergencyStop" class="emergency-stop" onclick="sendEmergencyStop()">
@@ -22,8 +22,21 @@
             </button>
             <div id="statusMessage" class="status-message"></div>
         </div>
-        
-        <!-- I will put printer info here once I know what the info is going to look like from octoprint -->
+        <div class="printer-section">
+            <h2>Printer Info</h2>
+            {% if printer %}
+                <p><strong>Status:</strong> {{ printer.state.text }}</p>
+
+                <h3>State Flags</h3>
+                <ul>
+                    {% for k, v in printer.state.flags.items() %}
+                        <li>{{ k }}: {{ v }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>Printer information is currently unavailable.</p>
+            {% endif %}
+        </div>
     </div>
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
