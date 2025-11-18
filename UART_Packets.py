@@ -3,19 +3,21 @@ import enum
 
 class UARTPackets(enum.IntEnum):
 
-    RPI_ERR_PKT_ID				  = 0
-    RPI_GCODE_PKT_ID              = 1
-    RPI_AHT20_PKT_ID              = 2
-    RPI_SEN0169_PKT_ID            = 3
-    RPI_SEN0244_PKT_ID            = 4
-    RPI_AS7341_PKT_ID             = 5
-    # RPI_WATER_DATA_PKT_ID       = 8
-    RPI_BUTTONS_PKT_ID            = 6
-    RPI_NET_POT_STATUS_PKT_ID     = 7
-    RPI_GET_AXES_POS_PKT_ID       = 8
-    RPI_ACK_PKT_ID                = 9
-    RPI_UNIX_TIME_REQUEST_PKT_ID  = 10
-    RPI_UNIX_TIME_PKT_ID          = 11
+    RPI_ERR_PKT_ID				    = 0
+    RPI_GCODE_PKT_ID                = 1
+    RPI_AHT20_PKT_ID                = 2
+    RPI_SEN0169_PKT_ID              = 3
+    RPI_SEN0244_PKT_ID              = 4
+    RPI_AS7341_PKT_ID               = 5
+    # RPI_WATER_DATA_PKT_ID         = 8
+    RPI_BUTTONS_PKT_ID              = 6
+    RPI_NET_POT_STATUS_PKT_ID       = 7
+    RPI_GET_AXES_POS_PKT_ID         = 8
+    RPI_ACK_PKT_ID                  = 9
+    RPI_UNIX_TIME_REQUEST_PKT_ID    = 10
+    RPI_UNIX_TIME_PKT_ID            = 11
+    RPI_VIRTUAL_ESTOP_RQST_PKT_ID   = 12
+    RPI_VIRTUAL_ESTOP_STATE_PKT_ID  = 13
 
 RPI_PACKET_LENGTHS     = [
 	0,  # RPI_ERR_PKT_ID
