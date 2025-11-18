@@ -38,7 +38,7 @@ PACKET_VALID			   = 1
 class RPI_UART_Packet_GCode:
 	def __init__(self, data):
 		self.packet_id = data[0]
-		if self.packet_id is not UARTPackets.RPI_GCODE_PKT_ID:
+		if self.packet_id != UARTPackets.RPI_GCODE_PKT_ID:
 			self.valid = 0
 		else:
 			self.valid = 1
@@ -48,12 +48,12 @@ class RPI_UART_Packet_GCode:
 class RPI_UART_Packet_AHT20:
 	def __init__(self, data):
 		self.packet_id = data[0]
-		if self.packet_id is not UARTPackets.RPI_AHT20_PKT_ID:
+		if self.packet_id != UARTPackets.RPI_AHT20_PKT_ID:
 			self.valid = 0
 		else:
 			self.valid = 1
-		self.temperature = struct.unpack('<f', data[2:6])[0]
-		self.humidity = struct.unpack('<f', data[6:10])[0]
+		self.temperature = struct.unpack('<f', data[1:5])[0]
+		self.humidity = struct.unpack('<f', data[5:])[0]
 
 class RPI_UART_Packet_ACK:
 	def __init__(self, ack):
@@ -67,7 +67,7 @@ class RPI_UART_Packet_SEN0169:
 	def __init__(self, data):
 		self.packet_id = data[0]
 
-		if self.packet_id is not UARTPackets.RPI_SEN0169_PKT_ID:
+		if self.packet_id != UARTPackets.RPI_SEN0169_PKT_ID:
 			self.valid = 0
 		else:
 			self.valid = 1
@@ -78,7 +78,7 @@ class RPI_UART_Packet_SEN0244:
 	def __init__(self, data):
 		self.packet_id = data[0]
 
-		if self.packet_id is not UARTPackets.RPI_SEN0244_PKT_ID:
+		if self.packet_id != UARTPackets.RPI_SEN0244_PKT_ID:
 			self.valid = 0
 		else:
 			self.valid = 1
@@ -90,8 +90,8 @@ class RPI_UART_Packet_AS7341:
 		# Get packet ID
 		self.packet_id = data[PACKET_ID]
 
-    	# If the packet ID is not the AS7341_0 packet
-		if self.packet_id is not UARTPackets.RPI_AS7341_PKT_ID:
+    	# If the packet ID != the AS7341_0 packet
+		if self.packet_id != UARTPackets.RPI_AS7341_PKT_ID:
 			self.valid = 0
 		else:
 			# Get packet validity from data
@@ -124,7 +124,7 @@ class RPI_UART_Packet_UNIX_TIME_Request:
 		self.packet_id = data[PACKET_ID]
 
 		# If the packet ID is not the UNIX_TIME_REQUEST packet
-		if self.packet_id is not UARTPackets.RPI_UNIX_TIME_REQUEST_PKT_ID:
+		if self.packet_id != UARTPackets.RPI_UNIX_TIME_REQUEST_PKT_ID:
 			self.valid = False
 		else:
 			# Get packet validity from data
